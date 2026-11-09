@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Round The Corner</string>
+    <string name="nav_triggers">Triggers</string>
+    <string name="nav_places">Places</string>
+    <string name="nav_settings">Settings</string>
+</resources>

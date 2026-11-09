@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Launch theme: shown by the system before any Compose code runs
+        (AndroidX SplashScreen API, consistent on Android 10 through 16).
+        MainActivity swaps to the post-splash theme once preferences load.
+    -->
+    <style name="Theme.RoundTheCorner.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <!-- The foreground road is white, so give the icon its teal disc. -->
+        <item name="windowSplashScreenIconBackgroundColor">@color/brand_teal</item>
+        <item name="postSplashScreenTheme">@style/Theme.RoundTheCorner</item>
+    </style>
+
+    <!-- Window-level theme only; all real styling happens in Compose. -->
+    <style name="Theme.RoundTheCorner" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/splash_background</item>
+    </style>
+</resources>

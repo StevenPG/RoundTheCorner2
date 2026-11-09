@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Launcher icon foreground: a road that rounds a corner and ends at a
+    destination pin. Everything sits inside the 66dp adaptive-icon safe zone.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- The road, rounding the corner. -->
+    <path
+        android:pathData="M38,80 L38,60 Q38,46 52,46 L62,46"
+        android:strokeWidth="8"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <!-- Destination pin. -->
+    <path
+        android:fillColor="@color/brand_amber"
+        android:pathData="M72,58 C72,58 61,46.5 61,39 A11,11 0 1,1 83,39 C83,46.5 72,58 72,58 Z" />
+    <path
+        android:fillColor="@color/brand_teal"
+        android:pathData="M72,39m-4,0a4,4 0 1,1 8,0a4,4 0 1,1 -8,0" />
+</vector>

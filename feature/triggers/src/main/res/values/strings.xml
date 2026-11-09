@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="triggers_title">Triggers</string>
+    <string name="triggers_empty_title">No triggers yet</string>
+    <string name="triggers_empty_body">Pick a place, choose how close to get, and write a message. It sends automatically when you arrive or leave.</string>
+    <string name="triggers_add">New trigger</string>
+</resources>

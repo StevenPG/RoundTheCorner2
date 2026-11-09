@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="places_title">Places</string>
+    <string name="places_empty_title">No saved places</string>
+    <string name="places_empty_body">Save the places you go often. Search an address, drop a pin, or enter exact coordinates, then reuse them in any trigger.</string>
+    <string name="places_add">Add place</string>
+</resources>
