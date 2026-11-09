@@ -14,6 +14,7 @@ android {
 
 dependencies {
     api(project(":core:model"))
+    implementation(project(":core:domain")) // Geodesy (radius circle).
     implementation(project(":core:designsystem"))
     implementation(libs.maplibre.android)
     implementation(libs.androidx.lifecycle.runtime.compose)

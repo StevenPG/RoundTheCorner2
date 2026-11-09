@@ -33,7 +33,7 @@ jobs:
 
       - name: Unit + screenshot tests
         run: >
-          ./gradlew :core:model:test :core:domain:test testDebugUnitTest :app:testPlayDebugUnitTest
+          ./gradlew :core:model:test :core:domain:test testDebugUnitTest :app:testPlayDebugUnitTest :app:testFullDebugUnitTest
           -Proborazzi.test.verify=true
 
       - name: Upload screenshot diffs

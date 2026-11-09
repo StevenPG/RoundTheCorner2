@@ -39,6 +39,33 @@ object Geodesy {
     fun distance(from: Coordinates, to: Coordinates): Distance =
         Distance(vincentyMeters(from, to) ?: haversineMeters(from, to))
 
+    /**
+     * The point reached by travelling [distance] from [start] on initial
+     * [bearingDegrees] (0 = north, clockwise). Spherical model: < 0.5% error,
+     * which is invisible when drawing a radius on a map.
+     */
+    fun destination(start: Coordinates, bearingDegrees: Double, distance: Distance): Coordinates {
+        val delta = distance.meters / MEAN_RADIUS // Angular distance.
+        val theta = Math.toRadians(bearingDegrees)
+        val phi1 = Math.toRadians(start.latitude)
+        val lambda1 = Math.toRadians(start.longitude)
+        val phi2 = asin(sin(phi1) * cos(delta) + cos(phi1) * sin(delta) * cos(theta))
+        val lambda2 = lambda1 + atan2(sin(theta) * sin(delta) * cos(phi1), cos(delta) - sin(phi1) * sin(phi2))
+        // Normalise longitude to [-180, 180].
+        val lng = (Math.toDegrees(lambda2) + 540) % 360 - 180
+        return Coordinates(Math.toDegrees(phi2).coerceIn(-90.0, 90.0), lng)
+    }
+
+    /**
+     * Vertices of a circle of [radius] around [center], first point repeated
+     * at the end (closed ring, as GeoJSON polygons require).
+     */
+    fun circle(center: Coordinates, radius: Distance, segments: Int = 72): List<Coordinates> {
+        require(segments >= 8) { "Too few segments for a circle" }
+        val ring = (0 until segments).map { i -> destination(center, 360.0 * i / segments, radius) }
+        return ring + ring.first()
+    }
+
     /** Great-circle distance on a sphere. Exposed for comparison/testing. */
     fun haversineMeters(from: Coordinates, to: Coordinates): Double {
         val phi1 = Math.toRadians(from.latitude)

@@ -1,7 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- List -->
     <string name="triggers_title">Triggers</string>
     <string name="triggers_empty_title">No triggers yet</string>
     <string name="triggers_empty_body">Pick a place, choose how close to get, and write a message. It sends automatically when you arrive or leave.</string>
     <string name="triggers_add">New trigger</string>
+    <string name="triggers_arrive_at">Arrive at %1$s</string>
+    <string name="triggers_leave">Leave %1$s</string>
+    <string name="triggers_within">Within %1$s · %2$s</string>
+    <string name="triggers_beyond">Beyond %1$s · %2$s</string>
+    <string name="triggers_status_armed">Watching</string>
+    <string name="triggers_status_paused">Paused</string>
+    <string name="triggers_status_fired">Sent %1$s. Switch on to watch again</string>
+    <string name="triggers_toggle">Watch %1$s</string>
+    <string name="triggers_more_actions">More actions</string>
+    <string name="triggers_edit">Edit</string>
+    <string name="triggers_delete">Delete</string>
+    <string name="triggers_deleted">Trigger deleted</string>
+    <string name="triggers_recipient_needs_reentry">%1$s needs its details re-entered</string>
+
+    <!-- Editor -->
+    <string name="trigger_editor_new_title">New trigger</string>
+    <string name="trigger_editor_edit_title">Edit trigger</string>
+    <string name="trigger_editor_close">Close</string>
+    <string name="trigger_editor_save">Save</string>
+    <string name="trigger_editor_map_placeholder">Choose a place to preview the area</string>
+
+    <string name="trigger_editor_section_when">When</string>
+    <string name="trigger_editor_arrive">Arrive</string>
+    <string name="trigger_editor_leave">Leave</string>
+    <string name="trigger_editor_arrive_help">Sends when you get within this distance of the place.</string>
+    <string name="trigger_editor_leave_help">Sends when you go farther than this distance from the place.</string>
+    <string name="trigger_editor_place_label">Place</string>
+    <string name="trigger_editor_place_new">New place…</string>
+    <string name="trigger_editor_place_none">Add a place first</string>
+    <string name="trigger_editor_distance_label">Distance</string>
+    <string name="trigger_editor_distance_invalid">Enter a distance</string>
+    <string name="trigger_editor_distance_too_small">At least %1$s. GPS isn\'t precise enough below that</string>
+    <string name="trigger_editor_distance_too_large">At most %1$s</string>
+
+    <string name="trigger_editor_section_message">Message</string>
+    <string name="trigger_editor_recipient_label">Send to</string>
+    <string name="trigger_editor_recipient_new">New recipient…</string>
+    <string name="trigger_editor_recipient_none">Add a recipient first</string>
+    <string name="trigger_editor_recipient_needs_reentry">This recipient\'s details need re-entering before it can be used.</string>
+    <string name="trigger_editor_message_label">Message</string>
+    <string name="trigger_editor_insert">Insert</string>
+    <string name="trigger_editor_preview">Preview</string>
+    <string name="trigger_editor_default_arrive">Almost at {place}! About {distance} away.</string>
+    <string name="trigger_editor_default_leave">Just left {place} at {time}.</string>
+
+    <string name="trigger_editor_section_history">History</string>
+    <string name="trigger_editor_history_empty">Not sent yet.</string>
+    <string name="trigger_editor_history_awaiting">Handed to you to send</string>
+    <string name="trigger_editor_delete">Delete trigger</string>
+    <string name="trigger_editor_delete_confirm_title">Delete this trigger?</string>
+    <string name="trigger_editor_delete_confirm_body">Its send history is deleted too.</string>
+    <string name="trigger_editor_cancel">Cancel</string>
+
+    <!-- Placeholder chips -->
+    <string name="placeholder_place">Place</string>
+    <string name="placeholder_distance">Distance</string>
+    <string name="placeholder_radius">Trigger distance</string>
+    <string name="placeholder_time">Time</string>
 </resources>

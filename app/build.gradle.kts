@@ -102,5 +102,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     testImplementation(project(":core:testing"))
+    testImplementation(libs.hilt.android.testing)
+    kspTest(libs.hilt.compiler)
     testImplementation(libs.turbine)
 }

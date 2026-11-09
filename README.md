@@ -12,7 +12,7 @@ place. The message can go out as an SMS, a Slack message or a Discord message.
 | 2 | Domain model, Room, distance + hysteresis logic | ✅ |
 | 3 | Places: manual lat/lng entry, address search (Nominatim), map picker (MapLibre/OSM), saved places | ✅ |
 | 4 | Recipients + senders: SMS (per flavor), Slack webhook, Discord webhook | ✅ |
-| 5 | Trigger list and editor | ⏳ |
+| 5 | Trigger list and editor | ✅ |
 | 6 | Foreground monitoring service + live progress notification | ⏳ |
 | 7 | UI review loop | ⏳ |
 | 8 | Device-testing guide | ⏳ |
@@ -45,7 +45,7 @@ core/maps             MapLibre map wrapped for Compose (OpenFreeMap tiles)
 core/designsystem     Theme, colors, typography, shared composables (no domain types)
 core/ui               Shared composables that use domain types (place icons, ...)
 core/testing          Fakes + screenshot helpers (test-only)
-feature/triggers      Triggers tab
+feature/triggers      Triggers: list (watch/pause switch) + editor (radius map, message preview)
 feature/places        Saved places: list + editor (coordinates, search, map)
 feature/recipients    Saved recipients: list + editor with contact picker and test send
 feature/settings      Settings tab (distance units, theme)
@@ -71,6 +71,10 @@ to the application ID, so debug and release can be installed side by side.
 ./gradlew installFullDebug                           # install on a connected device
 ./gradlew :core:model:test :core:domain:test testDebugUnitTest :app:testPlayDebugUnitTest   # unit tests
 ```
+
+`AppShellScreenshotTest` is a Hilt integration test. It starts the real `MainActivity`
+with the real dependency graph (Room, DataStore and repositories) on a fresh install, so a
+mistake in dependency wiring fails CI.
 
 Screenshot tests write PNGs to `*/src/test/screenshots/`. To update the baselines, run:
 
@@ -133,6 +137,29 @@ Coordinate formats `CoordinateParser` accepts:
 
 A place or recipient that a trigger still uses can't be deleted. The repository returns
 `DeleteResult.InUse(n)` instead of quietly deleting the triggers too.
+
+## Triggers
+
+- **List:** each trigger has a switch. On means **watching**, which also re-arms a
+  trigger that has already sent; off means **paused**. Triggers that are watching sort
+  first and are visually emphasised. A trigger that has sent shows when it sent. A
+  recipient that needs re-entering is flagged on every trigger that uses it.
+- **Editor:**
+  - **When:** Arrive or Leave, with a short explanation of each.
+  - **Place:** a dropdown of saved places, plus *New place…*.
+  - **Distance:** entered in mi or km depending on your unit setting, with quick-pick
+    chips and limits of 25 m to 1,000 km.
+  - **Map:** a live MapLibre view of the radius around the place.
+  - **Recipient:** a dropdown, plus *New recipient…*.
+  - **Message:** placeholder chips insert `{place}`, `{distance}`, `{time}` and
+    `{radius}` at the cursor, and a chat-bubble preview shows the exact text that will
+    be sent.
+  - **History:** previously edited triggers show their send history.
+- A place or recipient created from inside the editor is selected automatically when you
+  come back. The app module wires those links, so feature modules never depend on each
+  other.
+- A distance you entered is always shown exactly as typed ("0.25 mi"). Measured distances
+  are rounded ("1.8 mi").
 
 ## Messaging
 

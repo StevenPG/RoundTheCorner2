@@ -16,7 +16,9 @@ import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDe
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.stevenpg.roundthecorner2.feature.places.PlaceEditorNavKey
 import com.stevenpg.roundthecorner2.feature.places.placesEntries
+import com.stevenpg.roundthecorner2.feature.recipients.RecipientEditorNavKey
 import com.stevenpg.roundthecorner2.feature.recipients.recipientsEntries
 import com.stevenpg.roundthecorner2.feature.settings.settingsEntry
 import com.stevenpg.roundthecorner2.feature.triggers.triggersEntries
@@ -78,8 +80,13 @@ fun RoundTheCornerApp(
                 rememberViewModelStoreNavEntryDecorator(),
             ),
             entryProvider = entryProvider {
-                // TODO(milestone 5): navigate to the trigger editor.
-                triggersEntries(onAddTrigger = {})
+                triggersEntries(
+                    navigate = navigationState::navigate,
+                    goBack = navigationState::goBack,
+                    // Cross-feature links are wired here so features never depend on each other.
+                    onCreatePlace = { navigationState.navigate(PlaceEditorNavKey()) },
+                    onCreateRecipient = { navigationState.navigate(RecipientEditorNavKey()) },
+                )
                 placesEntries(navigate = navigationState::navigate, goBack = navigationState::goBack)
                 recipientsEntries(navigate = navigationState::navigate, goBack = navigationState::goBack)
                 settingsEntry()

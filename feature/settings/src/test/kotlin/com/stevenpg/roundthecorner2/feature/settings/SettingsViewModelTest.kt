@@ -24,14 +24,15 @@ class SettingsViewModelTest {
 
     private val repository = FakeUserPreferencesRepository()
 
-    private val viewModel = SettingsViewModel(
+    // Lazy: created after MainDispatcherRule installs the test Main dispatcher.
+    private val viewModel by lazy { SettingsViewModel(
         preferencesRepository = repository,
         localeUnitSystemProvider = { ResolvedUnitSystem.METRIC },
         context = ApplicationProvider.getApplicationContext(),
-    )
+    ) }
 
     @Test
-    fun `state reflects repository and locale default`() = runTest {
+    fun `state reflects repository and locale default`() = runTest(mainDispatcherRule.testDispatcher) {
         viewModel.uiState.test {
             val ready = awaitReady()
             assertEquals(UnitSystem.SYSTEM, ready.preferences.unitSystem)
@@ -40,7 +41,7 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `user edits are persisted and re-emitted`() = runTest {
+    fun `user edits are persisted and re-emitted`() = runTest(mainDispatcherRule.testDispatcher) {
         viewModel.uiState.test {
             awaitReady()
 

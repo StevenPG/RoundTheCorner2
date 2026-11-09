@@ -17,10 +17,11 @@ class RecipientsViewModelTest {
     val main = MainDispatcherRule()
 
     private val repository = FakeRecipientRepository(listOf(TestData.family, TestData.alex))
-    private val viewModel = RecipientsViewModel(repository)
+    // Lazy: created after MainDispatcherRule installs the test Main dispatcher.
+    private val viewModel by lazy { RecipientsViewModel(repository) }
 
     @Test
-    fun `lists alphabetically and reports delete outcomes`() = runTest {
+    fun `lists alphabetically and reports delete outcomes`() = runTest(main.testDispatcher) {
         viewModel.uiState.test {
             var state = awaitItem()
             if (state is RecipientsUiState.Loading) state = awaitItem()

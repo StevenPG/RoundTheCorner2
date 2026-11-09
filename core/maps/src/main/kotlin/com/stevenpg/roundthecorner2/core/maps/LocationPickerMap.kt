@@ -8,28 +8,17 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.stevenpg.roundthecorner2.core.model.Coordinates
-import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.MapView
 
 /** Zoom used when jumping to a location (street level). */
 private const val LOCATION_ZOOM = 16.0
@@ -51,56 +40,25 @@ fun LocationPickerMap(
     onCenterChangedByUser: (Coordinates) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
     val currentOnCenterChanged by rememberUpdatedState(onCenterChangedByUser)
-    val styleUrl = if (MaterialTheme.colorScheme.surface.luminance() < 0.5f) MapStyles.DARK else MapStyles.LIGHT
+    val styleUrl = themedStyleUrl()
 
-    // MapLibre must be initialised before the first MapView is created.
-    val mapView = remember {
-        MapLibre.getInstance(context)
-        MapView(context).apply { onCreate(null) }
-    }
-    var map by remember { mutableStateOf<MapLibreMap?>(null) }
-
-    // Forward the screen's lifecycle to the MapView (it manages GL resources).
-    DisposableEffect(lifecycle, mapView) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_START -> mapView.onStart()
-                Lifecycle.Event.ON_RESUME -> mapView.onResume()
-                Lifecycle.Event.ON_PAUSE -> mapView.onPause()
-                Lifecycle.Event.ON_STOP -> mapView.onStop()
-                else -> Unit
-            }
+    val (mapView, map) = rememberMapView { m ->
+        m.uiSettings.apply {
+            isRotateGesturesEnabled = false // North-up keeps the picker predictable.
+            isTiltGesturesEnabled = false
+            isCompassEnabled = false
         }
-        lifecycle.addObserver(observer)
-        onDispose {
-            lifecycle.removeObserver(observer)
-            mapView.onDestroy()
+        var userGesture = false
+        m.addOnCameraMoveStartedListener { reason ->
+            userGesture = reason == MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE
         }
-    }
-
-    // One-time map configuration.
-    LaunchedEffect(mapView) {
-        mapView.getMapAsync { m ->
-            m.uiSettings.apply {
-                isRotateGesturesEnabled = false // North-up keeps the picker predictable.
-                isTiltGesturesEnabled = false
-                isCompassEnabled = false
+        m.addOnCameraIdleListener {
+            if (userGesture) {
+                userGesture = false
+                val target = m.cameraPosition.target ?: return@addOnCameraIdleListener
+                Coordinates.orNull(target.latitude, target.longitude)?.let(currentOnCenterChanged)
             }
-            var userGesture = false
-            m.addOnCameraMoveStartedListener { reason ->
-                userGesture = reason == MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE
-            }
-            m.addOnCameraIdleListener {
-                if (userGesture) {
-                    userGesture = false
-                    val target = m.cameraPosition.target ?: return@addOnCameraIdleListener
-                    Coordinates.orNull(target.latitude, target.longitude)?.let(currentOnCenterChanged)
-                }
-            }
-            map = m
         }
     }
 

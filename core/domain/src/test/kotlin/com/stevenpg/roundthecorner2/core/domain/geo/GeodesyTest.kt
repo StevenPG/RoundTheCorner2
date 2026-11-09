@@ -54,4 +54,27 @@ class GeodesyTest {
         val sphere = Geodesy.haversineMeters(a, b)
         assertEquals(ellipsoid, sphere, ellipsoid * 0.005)
     }
+
+    @Test
+    fun `destination then distance round-trips`() {
+        val start = Coordinates(39.7392, -104.9903)
+        val end = Geodesy.destination(start, bearingDegrees = 45.0, distance = com.stevenpg.roundthecorner2.core.model.Distance(5_000.0))
+        // Ellipsoidal distance vs spherical construction: within 0.5%.
+        assertEquals(5_000.0, Geodesy.distance(start, end).meters, 25.0)
+    }
+
+    @Test
+    fun `circle is closed and every vertex sits on the radius`() {
+        val center = Coordinates(51.5, -0.12)
+        val ring = Geodesy.circle(center, com.stevenpg.roundthecorner2.core.model.Distance(800.0), segments = 36)
+        assertEquals(37, ring.size)
+        assertEquals(ring.first(), ring.last())
+        ring.forEach { assertEquals(800.0, Geodesy.haversineMeters(center, it), 0.01) }
+    }
+
+    @Test
+    fun `destination wraps across the antimeridian`() {
+        val end = Geodesy.destination(Coordinates(0.0, 179.99), 90.0, com.stevenpg.roundthecorner2.core.model.Distance(5_000.0))
+        assertTrue(end.longitude < -179.9)
+    }
 }

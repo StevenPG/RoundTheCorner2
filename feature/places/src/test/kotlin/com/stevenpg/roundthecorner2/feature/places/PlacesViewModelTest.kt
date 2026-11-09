@@ -17,10 +17,11 @@ class PlacesViewModelTest {
     val main = MainDispatcherRule()
 
     private val repository = FakePlaceRepository(listOf(TestData.office, TestData.home))
-    private val viewModel = PlacesViewModel(repository)
+    // Lazy: created after MainDispatcherRule installs the test Main dispatcher.
+    private val viewModel by lazy { PlacesViewModel(repository) }
 
     @Test
-    fun `lists places alphabetically`() = runTest {
+    fun `lists places alphabetically`() = runTest(main.testDispatcher) {
         viewModel.uiState.test {
             var state = awaitItem()
             if (state is PlacesUiState.Loading) state = awaitItem()
@@ -29,7 +30,7 @@ class PlacesViewModelTest {
     }
 
     @Test
-    fun `delete reports success or the blocking trigger count`() = runTest {
+    fun `delete reports success or the blocking trigger count`() = runTest(main.testDispatcher) {
         repository.triggerUsage[TestData.home.id] = 1
         viewModel.messages.test {
             viewModel.delete(TestData.home)
