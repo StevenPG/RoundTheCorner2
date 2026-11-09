@@ -2,6 +2,7 @@ package com.stevenpg.roundthecorner2.core.data.repository
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import com.stevenpg.roundthecorner2.core.data.security.AesGcmSecretCipher
 import com.stevenpg.roundthecorner2.core.database.RoundTheCornerDatabase
 import com.stevenpg.roundthecorner2.core.model.Coordinates
 import com.stevenpg.roundthecorner2.core.model.MessageChannel
@@ -41,7 +42,9 @@ class RepositoryTest {
     ).allowMainThreadQueries().build()
 
     private val places = RoomPlaceRepository(db.placeDao(), clock)
-    private val recipients = RoomRecipientRepository(db.recipientDao(), clock)
+    private val key = javax.crypto.KeyGenerator.getInstance("AES").apply { init(256) }.generateKey()
+    private val cipher = AesGcmSecretCipher { key }
+    private val recipients = RoomRecipientRepository(db.recipientDao(), clock, cipher)
     private val triggers = RoomTriggerRepository(db.triggerDao(), clock)
     private val history = RoomSendHistoryRepository(db.sendAttemptDao(), clock)
 
@@ -110,6 +113,29 @@ class RepositoryTest {
         val r = recipients.getRecipient(id)!!
         assertEquals(MessageChannel.SLACK, r.destination.channel)
         assertTrue(r.destination is RecipientDestination.SlackWebhook)
+    }
+
+    @Test
+    fun `webhook URLs are encrypted at rest`() = runTest {
+        val url = "https://hooks.slack.com/services/T/B/SECRET"
+        val id = recipients.createRecipient(RecipientDraft("#family", RecipientDestination.SlackWebhook(url)))
+        val raw = db.recipientDao().getById(id.value)!!.address
+        assertTrue(raw.startsWith(AesGcmSecretCipher.PREFIX))
+        assertFalse(raw.contains("SECRET"))
+        assertEquals(url, recipients.getRecipient(id)!!.destination.address)
+    }
+
+    @Test
+    fun `undecryptable recipients are flagged instead of crashing`() = runTest {
+        val id = recipients.createRecipient(alex)
+        val otherPhone = RoomRecipientRepository(
+            db.recipientDao(), clock,
+            AesGcmSecretCipher { javax.crypto.KeyGenerator.getInstance("AES").apply { init(256) }.generateKey() },
+        )
+        val restored = otherPhone.getRecipient(id)!!
+        assertTrue(restored.needsReentry)
+        assertEquals("", restored.destination.address)
+        assertEquals("Alex", restored.name)
     }
 
     @Test(expected = IllegalArgumentException::class)

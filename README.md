@@ -11,7 +11,7 @@ place. The message can go out as an SMS, a Slack message or a Discord message.
 | 1 | Gradle skeleton, modules, Hilt, theme, navigation shell, Settings (units + theme), CI | ✅ |
 | 2 | Domain model, Room, distance + hysteresis logic | ✅ |
 | 3 | Places: manual lat/lng entry, address search (Nominatim), map picker (MapLibre/OSM), saved places | ✅ |
-| 4 | Recipients + senders: SMS (per flavor), Slack webhook, Discord webhook | ⏳ |
+| 4 | Recipients + senders: SMS (per flavor), Slack webhook, Discord webhook | ✅ |
 | 5 | Trigger list and editor | ⏳ |
 | 6 | Foreground monitoring service + live progress notification | ⏳ |
 | 7 | UI review loop | ⏳ |
@@ -40,12 +40,14 @@ core/domain           Pure-Kotlin logic: WGS84 distance, trigger state machine, 
 core/database         Room entities, DAOs, exported schemas (core/database/schemas)
 core/data             Repositories, the only data API that features use
 core/network          OkHttp client and the Nominatim geocoding client
+core/messaging        Message senders (Slack/Discord webhooks, SMS) + MessageDispatcher
 core/maps             MapLibre map wrapped for Compose (OpenFreeMap tiles)
 core/designsystem     Theme, colors, typography, shared composables (no domain types)
 core/ui               Shared composables that use domain types (place icons, ...)
 core/testing          Fakes + screenshot helpers (test-only)
 feature/triggers      Triggers tab
 feature/places        Saved places: list + editor (coordinates, search, map)
+feature/recipients    Saved recipients: list + editor with contact picker and test send
 feature/settings      Settings tab (distance units, theme)
 ```
 
@@ -131,6 +133,35 @@ Coordinate formats `CoordinateParser` accepts:
 
 A place or recipient that a trigger still uses can't be deleted. The repository returns
 `DeleteResult.InUse(n)` instead of quietly deleting the triggers too.
+
+## Messaging
+
+`MessageDispatcher` looks up the `MessageSender` for each channel. The senders are
+registered through Hilt map multibinding, which works much like collecting every bean of a
+type in Spring. The webhook senders are the same in every build. The SMS sender comes from
+`app/src/<flavor>/kotlin/.../di/SmsModule.kt`, so no other code checks which flavor it's in.
+
+| Channel | How it's sent | Safety |
+|---|---|---|
+| Slack | `POST {"text": ...}` to an Incoming Webhook | `<`, `>` and `&` are escaped, so a message can't trigger `<!channel>`-style pings |
+| Discord | `POST {"content": ...}` to a channel webhook | `allowed_mentions` is empty (no `@everyone`); text is cut at 2,000 characters |
+| SMS (`full`) | `SmsManager`, then waits for the carrier to confirm every part | Fails cleanly when there's no permission, no service or no telephony; a timeout is never retried, to avoid duplicate texts |
+| SMS (`play`) | A notification opens the messaging app with the text filled in | Needs no `SEND_SMS` permission. In-app tests open the messaging app directly |
+
+Every failure has a `FailureReason` that says whether retrying could help (network, 429 or
+5xx) or the user has to fix something (revoked webhook, permission denied). Messages and
+logs never include webhook URLs.
+
+**Security.** Recipient phone numbers and webhook URLs are encrypted with AES-256-GCM using
+a non-exportable Android Keystore key (`enc:v1:` in the database). Places, triggers and
+settings are included in backups. Keystore keys never leave the device, so a recipient
+restored onto a new phone shows **"Details need re-entering"** rather than crashing or
+leaking the secret.
+
+**Permissions.** `SEND_SMS` is only in `app/src/full/AndroidManifest.xml`. The contact
+picker uses `ACTION_PICK` on phone numbers, which grants access to the one picked row, so
+the app never asks for `READ_CONTACTS`. MapLibre's library manifest also adds location
+permissions, which the monitoring milestone needs anyway.
 
 ## Third-party services
 

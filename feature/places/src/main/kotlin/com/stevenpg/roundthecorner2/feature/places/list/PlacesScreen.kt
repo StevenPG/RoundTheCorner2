@@ -1,6 +1,5 @@
 package com.stevenpg.roundthecorner2.feature.places.list
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -16,21 +15,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.rounded.AddLocationAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -42,7 +34,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -50,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.stevenpg.roundthecorner2.core.designsystem.component.EmptyState
+import com.stevenpg.roundthecorner2.core.designsystem.component.ListCard
+import com.stevenpg.roundthecorner2.core.designsystem.component.ListCardAction
 import com.stevenpg.roundthecorner2.core.designsystem.component.RtcScreen
 import com.stevenpg.roundthecorner2.core.designsystem.theme.Spacing
 import com.stevenpg.roundthecorner2.core.model.Place
@@ -191,52 +184,18 @@ private fun PlaceRow(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var menuOpen by remember { mutableStateOf(false) }
-    Surface(
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        ListItem(
-            modifier = Modifier.clickable(onClick = onClick),
-            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-            leadingContent = { PlaceIconBadge(place.icon) },
-            headlineContent = { Text(place.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-            supportingContent = {
-                Text(
-                    text = place.address ?: place.coordinates.toString(),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            },
-            trailingContent = {
-                Box {
-                    IconButton(onClick = { menuOpen = true }) {
-                        Icon(
-                            Icons.Outlined.MoreVert,
-                            contentDescription = stringResource(R.string.places_more_actions, place.name),
-                        )
-                    }
-                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.places_edit)) },
-                            leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null) },
-                            onClick = {
-                                menuOpen = false
-                                onClick()
-                            },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.places_delete)) },
-                            leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null) },
-                            onClick = {
-                                menuOpen = false
-                                onDelete()
-                            },
-                        )
-                    }
-                }
-            },
-        )
-    }
+    ListCard(
+        modifier = modifier,
+        onClick = onClick,
+        leading = { PlaceIconBadge(place.icon) },
+        headline = { Text(place.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+        supporting = {
+            Text(text = place.address ?: place.coordinates.toString(), maxLines = 2, overflow = TextOverflow.Ellipsis)
+        },
+        moreActionsDescription = stringResource(R.string.places_more_actions, place.name),
+        actions = listOf(
+            ListCardAction(stringResource(R.string.places_edit), Icons.Outlined.Edit, onClick),
+            ListCardAction(stringResource(R.string.places_delete), Icons.Outlined.Delete, onDelete),
+        ),
+    )
 }

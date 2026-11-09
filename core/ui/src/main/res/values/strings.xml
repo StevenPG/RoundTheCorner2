@@ -10,4 +10,8 @@
     <string name="place_icon_shop">Shop</string>
     <string name="place_icon_restaurant">Food</string>
     <string name="place_icon_travel">Travel</string>
+
+    <string name="channel_sms">Text message</string>
+    <string name="channel_slack">Slack</string>
+    <string name="channel_discord">Discord</string>
 </resources>

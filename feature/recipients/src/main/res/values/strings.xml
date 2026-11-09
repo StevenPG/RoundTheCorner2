@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- List -->
+    <string name="recipients_title">Recipients</string>
+    <string name="recipients_empty_title">No recipients yet</string>
+    <string name="recipients_empty_body">Add the people and channels your triggers message: a phone number for texts, or a Slack or Discord webhook.</string>
+    <string name="recipients_add">Add recipient</string>
+    <string name="recipients_more_actions">More actions for %1$s</string>
+    <string name="recipients_edit">Edit</string>
+    <string name="recipients_delete">Delete</string>
+    <string name="recipients_deleted">Deleted %1$s</string>
+    <string name="recipients_webhook_summary">%1$s webhook · …%2$s</string>
+    <string name="recipients_needs_reentry">Details need re-entering</string>
+    <plurals name="recipients_in_use">
+        <item quantity="one">%1$s is used by a trigger. Delete or change that trigger first.</item>
+        <item quantity="other">%1$s is used by %2$d triggers. Delete or change those triggers first.</item>
+    </plurals>
+    <string name="recipients_delete_confirm_title">Delete %1$s?</string>
+    <string name="recipients_delete_confirm_body">Triggers that message this recipient must be changed first.</string>
+    <string name="recipients_cancel">Cancel</string>
+
+    <!-- Editor -->
+    <string name="recipient_editor_new_title">New recipient</string>
+    <string name="recipient_editor_edit_title">Edit recipient</string>
+    <string name="recipient_editor_close">Close</string>
+    <string name="recipient_editor_save">Save</string>
+    <string name="recipient_editor_section_channel">Send with</string>
+    <string name="recipient_editor_section_details">Details</string>
+    <string name="recipient_editor_name_label">Name</string>
+    <string name="recipient_editor_name_placeholder">Alex, #family, Team chat…</string>
+    <string name="recipient_editor_phone_label">Phone number</string>
+    <string name="recipient_editor_pick_contact">Choose from contacts</string>
+    <string name="recipient_editor_webhook_label">Webhook URL</string>
+    <string name="recipient_editor_slack_help">In Slack, add the Incoming Webhooks app to a channel and copy its URL. It starts with https://hooks.slack.com/services/</string>
+    <string name="recipient_editor_discord_help">In Discord, open Channel settings → Integrations → Webhooks → New webhook, then Copy webhook URL.</string>
+    <string name="recipient_editor_webhook_guide">How to get a webhook URL</string>
+    <string name="recipient_editor_secret_note">Stored encrypted on this device. Anyone with this URL can post to the channel, so keep it private.</string>
+    <string name="recipient_editor_sms_tap_to_send">When a trigger fires you\'ll get a notification. Tap it and your messaging app opens with the text ready, so sending takes one tap. Google Play doesn\'t allow apps to send texts on their own.</string>
+    <string name="recipient_editor_sms_automatic">Texts send automatically from your phone number. Standard carrier rates apply.</string>
+    <string name="recipient_editor_sms_permission">Allow SMS so triggers can text automatically.</string>
+    <string name="recipient_editor_sms_permission_grant">Allow</string>
+    <string name="recipient_editor_needs_reentry">This recipient\'s details couldn\'t be read on this device (for example after restoring a backup). Enter them again.</string>
+    <string name="recipient_editor_test">Send test message</string>
+    <string name="recipient_editor_test_message">✅ Test from Round The Corner: this recipient is set up correctly.</string>
+    <string name="recipient_editor_test_sent">Test message sent</string>
+    <string name="recipient_editor_test_awaiting">Opened your messaging app. Tap Send to finish.</string>
+    <string name="recipient_editor_test_failed">Test failed: %1$s</string>
+    <string name="recipient_editor_delete">Delete recipient</string>
+
+    <!-- Validation -->
+    <string name="recipient_problem_phone">Enter a valid phone number</string>
+    <string name="recipient_problem_https">The URL must start with https://</string>
+    <string name="recipient_problem_slack">That isn\'t a Slack webhook URL (https://hooks.slack.com/services/…)</string>
+    <string name="recipient_problem_discord">That isn\'t a Discord webhook URL (https://discord.com/api/webhooks/…)</string>
+</resources>

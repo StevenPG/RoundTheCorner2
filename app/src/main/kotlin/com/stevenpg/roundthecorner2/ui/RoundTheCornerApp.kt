@@ -17,6 +17,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.stevenpg.roundthecorner2.feature.places.placesEntries
+import com.stevenpg.roundthecorner2.feature.recipients.recipientsEntries
 import com.stevenpg.roundthecorner2.feature.settings.settingsEntry
 import com.stevenpg.roundthecorner2.feature.triggers.triggersEntries
 import com.stevenpg.roundthecorner2.navigation.AppNavigationState
@@ -80,6 +81,7 @@ fun RoundTheCornerApp(
                 // TODO(milestone 5): navigate to the trigger editor.
                 triggersEntries(onAddTrigger = {})
                 placesEntries(navigate = navigationState::navigate, goBack = navigationState::goBack)
+                recipientsEntries(navigate = navigationState::navigate, goBack = navigationState::goBack)
                 settingsEntry()
             },
         )

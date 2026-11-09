@@ -66,6 +66,16 @@ fun PlaceIconBadge(
     size: Dp = 44.dp,
     containerColor: Color = MaterialTheme.colorScheme.secondaryContainer,
     contentColor: Color = MaterialTheme.colorScheme.onSecondaryContainer,
+) = IconBadge(icon.imageVector, modifier, size, containerColor, contentColor)
+
+/** Any icon centred in a filled circle. */
+@Composable
+fun IconBadge(
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    size: Dp = 44.dp,
+    containerColor: Color = MaterialTheme.colorScheme.secondaryContainer,
+    contentColor: Color = MaterialTheme.colorScheme.onSecondaryContainer,
 ) {
     Box(
         modifier = modifier
@@ -73,6 +83,6 @@ fun PlaceIconBadge(
             .background(containerColor, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon.imageVector, contentDescription = null, tint = contentColor, modifier = Modifier.size(size * 0.5f))
+        Icon(icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(size * 0.5f))
     }
 }

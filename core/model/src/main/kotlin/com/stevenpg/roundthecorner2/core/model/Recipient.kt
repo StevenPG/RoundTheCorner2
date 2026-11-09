@@ -12,6 +12,11 @@ data class Recipient(
     val name: String,
     val destination: RecipientDestination,
     val createdAt: Instant,
+    /**
+     * True if the stored phone number / webhook couldn't be decrypted (e.g.
+     * restored onto a new phone). The user must re-enter it; sending fails.
+     */
+    val needsReentry: Boolean = false,
 )
 
 @JvmInline

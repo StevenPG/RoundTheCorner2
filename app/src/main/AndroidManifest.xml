@@ -2,17 +2,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
-        Permissions are added milestone by milestone, each with a comment
-        explaining why it is needed:
-          - location (fine + foreground service)   -> monitoring milestone
-          - POST_NOTIFICATIONS                     -> monitoring milestone
-          - INTERNET                               -> places / messaging milestones
-          - SEND_SMS (full flavor manifest only)   -> messaging milestone
+        Permissions are declared by the module that needs them and merged here:
+          - INTERNET            core:network, core:maps, core:messaging
+          - POST_NOTIFICATIONS  core:messaging (SMS hand-off; monitoring later)
+          - SEND_SMS            src/full/AndroidManifest.xml only
+          - location            monitoring milestone
     -->
+
+    <!-- SMS is optional: Wi-Fi-only tablets can still install and use webhooks. -->
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
 
     <application
         android:name=".RoundTheCornerApplication"
         android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"

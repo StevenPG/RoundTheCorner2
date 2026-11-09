@@ -85,8 +85,10 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:data"))
     implementation(project(":core:designsystem"))
+    implementation(project(":core:messaging"))
     implementation(project(":feature:triggers"))
     implementation(project(":feature:places"))
+    implementation(project(":feature:recipients"))
     implementation(project(":feature:settings"))
 
     implementation(libs.androidx.core.ktx)

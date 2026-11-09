@@ -3,5 +3,6 @@
     <string name="app_name">Round The Corner</string>
     <string name="nav_triggers">Triggers</string>
     <string name="nav_places">Places</string>
+    <string name="nav_recipients">Recipients</string>
     <string name="nav_settings">Settings</string>
 </resources>

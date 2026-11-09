@@ -19,6 +19,9 @@ import com.stevenpg.roundthecorner2.core.data.repository.RoomSendHistoryReposito
 import com.stevenpg.roundthecorner2.core.data.repository.RoomTriggerRepository
 import com.stevenpg.roundthecorner2.core.data.repository.SendHistoryRepository
 import com.stevenpg.roundthecorner2.core.data.repository.TriggerRepository
+import com.stevenpg.roundthecorner2.core.data.security.AesGcmSecretCipher
+import com.stevenpg.roundthecorner2.core.data.security.KeystoreKeyProvider
+import com.stevenpg.roundthecorner2.core.data.security.SecretCipher
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -58,6 +61,11 @@ internal abstract class DataModule {
     abstract fun bindLocaleUnitSystemProvider(impl: IcuLocaleUnitSystemProvider): LocaleUnitSystemProvider
 
     companion object {
+        /** AES-GCM with a non-exportable Android Keystore key, loaded lazily on first use. */
+        @Provides
+        @Singleton
+        fun provideSecretCipher(): SecretCipher = AesGcmSecretCipher(KeystoreKeyProvider::getOrCreateKey)
+
         /** Injected wherever "now" is needed, so tests can control time. */
         @Provides
         @Singleton

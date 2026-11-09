@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="messaging_sms_channel_name">Messages ready to send</string>
+    <string name="messaging_sms_channel_description">A trigger fired and its text message is ready. Tap to open it in your messaging app and send.</string>
+    <string name="messaging_sms_handoff_title">Tap to send your text to %1$s</string>
+</resources>

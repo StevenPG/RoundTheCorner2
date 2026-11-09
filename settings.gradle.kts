@@ -11,10 +11,11 @@
  *   :core:ui              - shared composables that know the domain model (place icons, ...)
  *   :core:maps            - MapLibre map wrapped for Compose (OpenFreeMap tiles)
  *   :core:network         - OkHttp client + API clients (Nominatim geocoding)
+ *   :core:messaging       - message senders: Slack/Discord webhooks, SMS (auto or tap-to-send)
  *   :core:model           - pure-Kotlin domain types (no Android imports)
  *   :core:testing         - fakes + screenshot helpers (test-only)
  *
- * Later milestones add :core:location, :core:messaging and :feature:monitor.
+ * Later milestones add :core:location and :feature:monitor.
  */
 pluginManagement {
     includeBuild("build-logic")
@@ -48,10 +49,12 @@ include(":core:domain")
 include(":core:designsystem")
 include(":core:database")
 include(":core:network")
+include(":core:messaging")
 include(":core:maps")
 include(":core:ui")
 include(":core:data")
 include(":core:testing")
 include(":feature:triggers")
 include(":feature:places")
+include(":feature:recipients")
 include(":feature:settings")

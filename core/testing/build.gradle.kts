@@ -14,6 +14,7 @@ android {
 dependencies {
     api(project(":core:designsystem"))
     api(project(":core:data"))
+    api(project(":core:messaging"))
     api(libs.junit4)
     api(libs.kotlinx.coroutines.test)
     api(libs.robolectric)
