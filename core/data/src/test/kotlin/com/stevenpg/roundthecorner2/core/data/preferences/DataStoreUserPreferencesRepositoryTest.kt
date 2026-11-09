@@ -2,6 +2,7 @@ package com.stevenpg.roundthecorner2.core.data.preferences
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import app.cash.turbine.test
+import com.stevenpg.roundthecorner2.core.model.CheckInterval
 import com.stevenpg.roundthecorner2.core.model.ThemePreference
 import com.stevenpg.roundthecorner2.core.model.UnitSystem
 import com.stevenpg.roundthecorner2.core.model.UserPreferences
@@ -49,6 +50,9 @@ class DataStoreUserPreferencesRepositoryTest {
 
             repo.setUseDynamicColor(true)
             assertEquals(true, awaitItem().useDynamicColor)
+
+            repo.setCheckInterval(CheckInterval.FIVE_MINUTES)
+            assertEquals(CheckInterval.FIVE_MINUTES, awaitItem().checkInterval)
         }
     }
 }

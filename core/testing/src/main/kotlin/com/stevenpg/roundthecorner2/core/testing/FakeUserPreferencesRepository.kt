@@ -1,6 +1,7 @@
 package com.stevenpg.roundthecorner2.core.testing
 
 import com.stevenpg.roundthecorner2.core.data.preferences.UserPreferencesRepository
+import com.stevenpg.roundthecorner2.core.model.CheckInterval
 import com.stevenpg.roundthecorner2.core.model.ThemePreference
 import com.stevenpg.roundthecorner2.core.model.UnitSystem
 import com.stevenpg.roundthecorner2.core.model.UserPreferences
@@ -25,4 +26,7 @@ class FakeUserPreferencesRepository(
 
     override suspend fun setUseDynamicColor(useDynamicColor: Boolean) =
         state.update { it.copy(useDynamicColor = useDynamicColor) }
+
+    override suspend fun setCheckInterval(checkInterval: CheckInterval) =
+        state.update { it.copy(checkInterval = checkInterval) }
 }

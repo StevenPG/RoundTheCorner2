@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!--
         Permissions are declared by the module that needs them and merged here:
           - INTERNET            core:network, core:maps, core:messaging
           - POST_NOTIFICATIONS  core:messaging (SMS hand-off; monitoring later)
           - SEND_SMS            src/full/AndroidManifest.xml only
-          - location            monitoring milestone
+          - location            core:location (fine + background)
+          - foreground service, boot, promoted notifications   core:monitoring
     -->
 
     <!-- SMS is optional: Wi-Fi-only tablets can still install and use webhooks. -->
@@ -33,5 +35,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- WorkManager is initialised on demand with Hilt's worker factory (see RoundTheCornerApplication). -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
     </application>
 </manifest>

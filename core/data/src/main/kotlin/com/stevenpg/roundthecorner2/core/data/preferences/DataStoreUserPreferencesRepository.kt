@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.stevenpg.roundthecorner2.core.model.CheckInterval
 import com.stevenpg.roundthecorner2.core.model.ThemePreference
 import com.stevenpg.roundthecorner2.core.model.UnitSystem
 import com.stevenpg.roundthecorner2.core.model.UserPreferences
@@ -45,12 +46,17 @@ internal class DataStoreUserPreferencesRepository @Inject constructor(
         dataStore.edit { it[Keys.DYNAMIC_COLOR] = useDynamicColor }
     }
 
+    override suspend fun setCheckInterval(checkInterval: CheckInterval) {
+        dataStore.edit { it[Keys.CHECK_INTERVAL] = checkInterval.name }
+    }
+
     private fun Preferences.toUserPreferences(): UserPreferences {
         val defaults = UserPreferences()
         return UserPreferences(
             unitSystem = enumOrDefault(this[Keys.UNIT_SYSTEM], defaults.unitSystem),
             themePreference = enumOrDefault(this[Keys.THEME], defaults.themePreference),
             useDynamicColor = this[Keys.DYNAMIC_COLOR] ?: defaults.useDynamicColor,
+            checkInterval = enumOrDefault(this[Keys.CHECK_INTERVAL], defaults.checkInterval),
         )
     }
 
@@ -62,5 +68,6 @@ internal class DataStoreUserPreferencesRepository @Inject constructor(
         val UNIT_SYSTEM = stringPreferencesKey("unit_system")
         val THEME = stringPreferencesKey("theme")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
+        val CHECK_INTERVAL = stringPreferencesKey("check_interval")
     }
 }

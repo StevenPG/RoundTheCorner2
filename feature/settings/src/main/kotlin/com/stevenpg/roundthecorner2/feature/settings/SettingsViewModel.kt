@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stevenpg.roundthecorner2.core.data.locale.LocaleUnitSystemProvider
 import com.stevenpg.roundthecorner2.core.data.preferences.UserPreferencesRepository
+import com.stevenpg.roundthecorner2.core.model.CheckInterval
 import com.stevenpg.roundthecorner2.core.model.ThemePreference
 import com.stevenpg.roundthecorner2.core.model.UnitSystem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,6 +52,10 @@ class SettingsViewModel @Inject constructor(
 
     fun onThemeSelected(theme: ThemePreference) {
         viewModelScope.launch { preferencesRepository.setThemePreference(theme) }
+    }
+
+    fun onCheckIntervalSelected(interval: CheckInterval) {
+        viewModelScope.launch { preferencesRepository.setCheckInterval(interval) }
     }
 
     fun onDynamicColorToggled(enabled: Boolean) {

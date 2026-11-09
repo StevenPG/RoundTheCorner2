@@ -11,6 +11,14 @@
     <string name="settings_units_imperial">Imperial</string>
     <string name="settings_units_imperial_summary">Miles and feet</string>
 
+    <string name="settings_section_monitoring">Monitoring</string>
+    <string name="settings_check_interval">Check location at least every</string>
+    <string name="settings_check_interval_summary">How often to check while you\'re far away. Checks speed up automatically as you get close. Longer saves battery.</string>
+    <string name="settings_interval_30s">30 s</string>
+    <string name="settings_interval_1m">1 min</string>
+    <string name="settings_interval_2m">2 min</string>
+    <string name="settings_interval_5m">5 min</string>
+
     <string name="settings_section_appearance">Appearance</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_theme_system">System</string>

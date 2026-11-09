@@ -19,6 +19,22 @@
     <string name="triggers_deleted">Trigger deleted</string>
     <string name="triggers_recipient_needs_reentry">%1$s needs its details re-entered</string>
 
+    <string name="triggers_status_to_go">%1$s to go</string>
+    <string name="triggers_status_waiting_gps">Waiting for GPS</string>
+
+    <!-- Monitoring requirements banner -->
+    <string name="banner_location_title">Location access needed</string>
+    <string name="banner_location_body">Armed triggers can\'t be watched until you allow precise location.</string>
+    <string name="banner_notifications_title">Turn on notifications</string>
+    <string name="banner_notifications_body">See your live distance, and know when a message has been sent.</string>
+    <string name="banner_background_title">Keep watching after restarts</string>
+    <string name="banner_background_body">Choose \"Allow all the time\" so monitoring resumes automatically after your phone restarts.</string>
+    <string name="banner_battery_title">Avoid delayed alerts</string>
+    <string name="banner_battery_body">Battery optimisation can pause location checks. Set Round The Corner to \"Unrestricted\" or \"Not optimised\".</string>
+    <string name="banner_allow">Allow</string>
+    <string name="banner_open_settings">Open settings</string>
+    <string name="banner_not_now">Not now</string>
+
     <!-- Editor -->
     <string name="trigger_editor_new_title">New trigger</string>
     <string name="trigger_editor_edit_title">Edit trigger</string>

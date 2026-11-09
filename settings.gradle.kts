@@ -15,7 +15,8 @@
  *   :core:model           - pure-Kotlin domain types (no Android imports)
  *   :core:testing         - fakes + screenshot helpers (test-only)
  *
- * Later milestones add :core:location and :feature:monitor.
+ *   :core:location        - device location (Fused provider, platform fallback)
+ *   :core:monitoring      - the foreground service, live notification, firing + retries
  */
 pluginManagement {
     includeBuild("build-logic")
@@ -50,6 +51,8 @@ include(":core:designsystem")
 include(":core:database")
 include(":core:network")
 include(":core:messaging")
+include(":core:location")
+include(":core:monitoring")
 include(":core:maps")
 include(":core:ui")
 include(":core:data")

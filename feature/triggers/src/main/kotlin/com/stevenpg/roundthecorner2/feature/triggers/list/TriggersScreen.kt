@@ -55,10 +55,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.stevenpg.roundthecorner2.core.designsystem.component.EmptyState
 import com.stevenpg.roundthecorner2.core.designsystem.component.RtcScreen
 import com.stevenpg.roundthecorner2.core.designsystem.theme.Spacing
+import com.stevenpg.roundthecorner2.core.domain.format.DistanceFormatter
 import com.stevenpg.roundthecorner2.core.domain.format.RadiusInput
 import com.stevenpg.roundthecorner2.core.model.TriggerDetails
 import com.stevenpg.roundthecorner2.core.model.TriggerDirection
@@ -81,6 +83,12 @@ fun TriggersRoute(
     LaunchedEffect(viewModel) {
         viewModel.deleted.collect { snackbarHostState.showSnackbar(resources.getString(R.string.triggers_deleted)) }
     }
+    // Permissions can change in system Settings at any time: re-check on every resume.
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResume()
+        onPauseOrDispose { }
+    }
+    val fixRequirement = rememberRequirementFixer(onResult = viewModel::onResume)
     TriggersScreen(
         uiState = uiState,
         snackbarHostState = snackbarHostState,
@@ -88,6 +96,8 @@ fun TriggersRoute(
         onEditTrigger = onEditTrigger,
         onWatchingChange = viewModel::setWatching,
         onDelete = viewModel::delete,
+        onFixRequirement = fixRequirement,
+        onDismissRequirement = viewModel::dismiss,
     )
 }
 
@@ -101,6 +111,8 @@ fun TriggersScreen(
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     zone: ZoneId = ZoneId.systemDefault(),
+    onFixRequirement: (MonitoringRequirement) -> Unit = {},
+    onDismissRequirement: (MonitoringRequirement) -> Unit = {},
 ) {
     RtcScreen(
         title = stringResource(R.string.triggers_title),
@@ -133,6 +145,7 @@ fun TriggersScreen(
                         }
                     }
                 } else {
+                    val distanceFormatter = remember { DistanceFormatter() }
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(
@@ -143,10 +156,29 @@ fun TriggersScreen(
                         ),
                         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
                     ) {
+                        uiState.requirement?.let { requirement ->
+                            item(key = "requirement") {
+                                RequirementBanner(
+                                    requirement = requirement,
+                                    onFix = { onFixRequirement(requirement) },
+                                    onDismiss = { onDismissRequirement(requirement) },
+                                    modifier = Modifier.animateItem().padding(bottom = Spacing.xs),
+                                )
+                            }
+                        }
                         items(uiState.triggers, key = { it.trigger.id.value }) { details ->
+                            val live = uiState.live[details.trigger.id]
                             TriggerCard(
                                 details = details,
                                 radiusText = RadiusInput.display(details.trigger.radius, uiState.unitSystem),
+                                liveText = when {
+                                    live?.remaining != null -> stringResource(
+                                        R.string.triggers_status_to_go,
+                                        distanceFormatter.format(live.remaining!!, uiState.unitSystem),
+                                    )
+                                    live != null && uiState.waitingForAccuracy -> stringResource(R.string.triggers_status_waiting_gps)
+                                    else -> null
+                                },
                                 zone = zone,
                                 onClick = { onEditTrigger(details.trigger.id) },
                                 onWatchingChange = { onWatchingChange(details.trigger.id, it) },
@@ -168,6 +200,7 @@ fun TriggersScreen(
 private fun TriggerCard(
     details: TriggerDetails,
     radiusText: String,
+    liveText: String?,
     zone: ZoneId,
     onClick: () -> Unit,
     onWatchingChange: (Boolean) -> Unit,
@@ -219,7 +252,7 @@ private fun TriggerCard(
                 } else {
                     StatusLine(
                         text = when (trigger.status) {
-                            TriggerStatus.ARMED -> stringResource(R.string.triggers_status_armed)
+                            TriggerStatus.ARMED -> liveText ?: stringResource(R.string.triggers_status_armed)
                             TriggerStatus.PAUSED -> stringResource(R.string.triggers_status_paused)
                             TriggerStatus.FIRED -> stringResource(
                                 R.string.triggers_status_fired,

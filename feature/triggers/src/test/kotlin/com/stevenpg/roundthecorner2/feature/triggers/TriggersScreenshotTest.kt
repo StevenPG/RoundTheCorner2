@@ -13,13 +13,16 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
+import com.stevenpg.roundthecorner2.core.domain.monitoring.TriggerProgress
 import com.stevenpg.roundthecorner2.core.model.ResolvedUnitSystem
+import com.stevenpg.roundthecorner2.core.model.miles
 import com.stevenpg.roundthecorner2.core.model.TriggerDirection
 import com.stevenpg.roundthecorner2.core.testing.SCREENSHOT_SDK
 import com.stevenpg.roundthecorner2.core.testing.captureLightAndDark
 import com.stevenpg.roundthecorner2.feature.triggers.editor.RadiusMapContent
 import com.stevenpg.roundthecorner2.feature.triggers.editor.TriggerEditorScreen
 import com.stevenpg.roundthecorner2.feature.triggers.editor.TriggerEditorUiState
+import com.stevenpg.roundthecorner2.feature.triggers.list.MonitoringRequirement
 import com.stevenpg.roundthecorner2.feature.triggers.list.TriggersScreen
 import com.stevenpg.roundthecorner2.feature.triggers.list.TriggersUiState
 import org.junit.Rule
@@ -76,6 +79,29 @@ class TriggersScreenshotTest {
             TriggersUiState.Ready(TestData.listDetails, ResolvedUnitSystem.IMPERIAL),
             {}, {}, { _, _ -> }, {},
             zone = ZoneOffset.UTC,
+        )
+    }
+
+    @Test
+    fun listMonitoringWithBanner(): Unit = composeRule.captureLightAndDark("triggers_live") {
+        val home = TestData.listDetails.first()
+        TriggersScreen(
+            TriggersUiState.Ready(
+                triggers = TestData.listDetails,
+                unitSystem = ResolvedUnitSystem.IMPERIAL,
+                live = mapOf(home.trigger.id to TriggerProgress(home, 3.8.miles, 1.8.miles, 0.4f)),
+                requirement = MonitoringRequirement.BACKGROUND_LOCATION,
+            ),
+            {}, {}, { _, _ -> }, {},
+            zone = ZoneOffset.UTC,
+        )
+    }
+
+    @Test
+    fun listLocationRequired(): Unit = composeRule.captureLightAndDark("triggers_needs_location") {
+        TriggersScreen(
+            TriggersUiState.Ready(TestData.listDetails.take(1), ResolvedUnitSystem.IMPERIAL, requirement = MonitoringRequirement.PRECISE_LOCATION),
+            {}, {}, { _, _ -> }, {},
         )
     }
 

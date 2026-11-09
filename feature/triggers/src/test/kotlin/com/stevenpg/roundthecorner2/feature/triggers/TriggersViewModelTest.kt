@@ -4,11 +4,16 @@ import app.cash.turbine.test
 import com.stevenpg.roundthecorner2.core.data.preferences.UnitSystemProvider
 import com.stevenpg.roundthecorner2.core.model.ResolvedUnitSystem
 import com.stevenpg.roundthecorner2.core.model.TriggerStatus
+import com.stevenpg.roundthecorner2.core.monitoring.MonitoringStarter
+import com.stevenpg.roundthecorner2.core.monitoring.MonitoringStatus
+import com.stevenpg.roundthecorner2.core.monitoring.PermissionChecker
+import com.stevenpg.roundthecorner2.core.monitoring.PermissionSnapshot
 import com.stevenpg.roundthecorner2.core.testing.FakePlaceRepository
 import com.stevenpg.roundthecorner2.core.testing.FakeRecipientRepository
 import com.stevenpg.roundthecorner2.core.testing.FakeTriggerRepository
 import com.stevenpg.roundthecorner2.core.testing.FakeUserPreferencesRepository
 import com.stevenpg.roundthecorner2.core.testing.MainDispatcherRule
+import com.stevenpg.roundthecorner2.feature.triggers.list.MonitoringRequirement
 import com.stevenpg.roundthecorner2.feature.triggers.list.TriggersUiState
 import com.stevenpg.roundthecorner2.feature.triggers.list.TriggersViewModel
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -27,12 +32,26 @@ class TriggersViewModelTest {
     private val triggers = FakeTriggerRepository(
         places, recipients, listOf(TestData.homeArrive, TestData.officeLeave, TestData.gymArrive),
     )
+    private var permissions = PermissionSnapshot(
+        preciseLocation = false, backgroundLocation = false, notifications = true, unrestrictedBattery = false,
+    )
+    private val permissionChecker = object : PermissionChecker {
+        override fun snapshot() = permissions
+    }
+    private var refreshes = 0
+    private val starter = object : MonitoringStarter {
+        override fun refresh() { refreshes++ }
+    }
+
     // Lazy: must be created after MainDispatcherRule has installed the test
     // Main dispatcher, or viewModelScope work escapes the test scheduler.
     private val viewModel by lazy {
         TriggersViewModel(
             triggers,
             UnitSystemProvider(FakeUserPreferencesRepository()) { ResolvedUnitSystem.IMPERIAL },
+            MonitoringStatus(),
+            permissionChecker,
+            starter,
         )
     }
 
@@ -66,6 +85,25 @@ class TriggersViewModelTest {
         viewModel.deleted.test {
             viewModel.delete(TestData.gymArrive.id)
             awaitItem()
+        }
+    }
+
+    @Test
+    fun `banner shows the most important missing permission and updates on resume`() = runTest(main.testDispatcher) {
+        viewModel.uiState.test {
+            fun TriggersUiState.requirement() = (this as TriggersUiState.Ready).requirement
+            var state = awaitItem()
+            while (state !is TriggersUiState.Ready) state = awaitItem()
+            assertEquals(MonitoringRequirement.PRECISE_LOCATION, state.requirement())
+
+            permissions = permissions.copy(preciseLocation = true)
+            viewModel.onResume()
+            assertEquals(MonitoringRequirement.BACKGROUND_LOCATION, awaitItem().requirement())
+            assertEquals("resuming nudges monitoring to start", 1, refreshes)
+
+            viewModel.dismiss(MonitoringRequirement.BACKGROUND_LOCATION) // optional: can be dismissed
+            assertEquals(MonitoringRequirement.BATTERY, awaitItem().requirement())
+            cancelAndIgnoreRemainingEvents()
         }
     }
 }

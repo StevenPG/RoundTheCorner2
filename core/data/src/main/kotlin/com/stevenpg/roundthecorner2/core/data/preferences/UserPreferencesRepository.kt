@@ -1,5 +1,6 @@
 package com.stevenpg.roundthecorner2.core.data.preferences
 
+import com.stevenpg.roundthecorner2.core.model.CheckInterval
 import com.stevenpg.roundthecorner2.core.model.ThemePreference
 import com.stevenpg.roundthecorner2.core.model.UnitSystem
 import com.stevenpg.roundthecorner2.core.model.UserPreferences
@@ -18,4 +19,5 @@ interface UserPreferencesRepository {
     suspend fun setUnitSystem(unitSystem: UnitSystem)
     suspend fun setThemePreference(themePreference: ThemePreference)
     suspend fun setUseDynamicColor(useDynamicColor: Boolean)
+    suspend fun setCheckInterval(checkInterval: CheckInterval)
 }

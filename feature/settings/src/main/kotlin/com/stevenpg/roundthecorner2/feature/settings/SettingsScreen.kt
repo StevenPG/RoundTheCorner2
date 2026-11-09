@@ -16,6 +16,7 @@ import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.SquareFoot
 import androidx.compose.material.icons.outlined.Straighten
+import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -43,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.stevenpg.roundthecorner2.core.designsystem.component.RtcScreen
 import com.stevenpg.roundthecorner2.core.designsystem.component.SectionHeader
 import com.stevenpg.roundthecorner2.core.designsystem.theme.Spacing
+import com.stevenpg.roundthecorner2.core.model.CheckInterval
 import com.stevenpg.roundthecorner2.core.model.ResolvedUnitSystem
 import com.stevenpg.roundthecorner2.core.model.ThemePreference
 import com.stevenpg.roundthecorner2.core.model.UnitSystem
@@ -59,6 +61,7 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
         onUnitSystemSelected = viewModel::onUnitSystemSelected,
         onThemeSelected = viewModel::onThemeSelected,
         onDynamicColorToggled = viewModel::onDynamicColorToggled,
+        onCheckIntervalSelected = viewModel::onCheckIntervalSelected,
     )
 }
 
@@ -69,6 +72,7 @@ fun SettingsScreen(
     onThemeSelected: (ThemePreference) -> Unit,
     onDynamicColorToggled: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    onCheckIntervalSelected: (CheckInterval) -> Unit = {},
 ) {
     RtcScreen(title = stringResource(R.string.settings_title), modifier = modifier) { innerPadding ->
         when (uiState) {
@@ -82,6 +86,7 @@ fun SettingsScreen(
                 contentPadding = innerPadding,
             ) {
                 item { UnitsSection(uiState, onUnitSystemSelected) }
+                item { MonitoringSection(uiState.preferences.checkInterval, onCheckIntervalSelected) }
                 item { AppearanceSection(uiState, onThemeSelected, onDynamicColorToggled) }
                 item { AboutSection(uiState.appVersion) }
             }
@@ -128,6 +133,37 @@ private fun UnitsSection(state: SettingsUiState.Ready, onSelected: (UnitSystem) 
                 onClick = { onSelected(UnitSystem.IMPERIAL) },
             )
         }
+    }
+}
+
+@Composable
+private fun MonitoringSection(selected: CheckInterval, onSelected: (CheckInterval) -> Unit) {
+    val options = listOf(
+        CheckInterval.THIRTY_SECONDS to R.string.settings_interval_30s,
+        CheckInterval.ONE_MINUTE to R.string.settings_interval_1m,
+        CheckInterval.TWO_MINUTES to R.string.settings_interval_2m,
+        CheckInterval.FIVE_MINUTES to R.string.settings_interval_5m,
+    )
+    SettingsGroup(title = stringResource(R.string.settings_section_monitoring)) {
+        ListItem(
+            colors = groupItemColors(),
+            leadingContent = { LeadingIcon(Icons.Outlined.Timer) },
+            headlineContent = { Text(stringResource(R.string.settings_check_interval)) },
+            supportingContent = {
+                Column {
+                    Text(stringResource(R.string.settings_check_interval_summary))
+                    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(top = Spacing.sm)) {
+                        options.forEachIndexed { index, (interval, label) ->
+                            SegmentedButton(
+                                selected = interval == selected,
+                                onClick = { onSelected(interval) },
+                                shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                            ) { Text(stringResource(label)) }
+                        }
+                    }
+                }
+            },
+        )
     }
 }
 

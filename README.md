@@ -13,7 +13,7 @@ place. The message can go out as an SMS, a Slack message or a Discord message.
 | 3 | Places: manual lat/lng entry, address search (Nominatim), map picker (MapLibre/OSM), saved places | ✅ |
 | 4 | Recipients + senders: SMS (per flavor), Slack webhook, Discord webhook | ✅ |
 | 5 | Trigger list and editor | ✅ |
-| 6 | Foreground monitoring service + live progress notification | ⏳ |
+| 6 | Foreground monitoring service + live progress notification | ✅ |
 | 7 | UI review loop | ⏳ |
 | 8 | Device-testing guide | ⏳ |
 
@@ -40,6 +40,8 @@ core/domain           Pure-Kotlin logic: WGS84 distance, trigger state machine, 
 core/database         Room entities, DAOs, exported schemas (core/database/schemas)
 core/data             Repositories, the only data API that features use
 core/network          OkHttp client and the Nominatim geocoding client
+core/location         Device location: Fused provider, with a platform LocationManager fallback
+core/monitoring       Foreground service, live notification, firing, retries, boot restart
 core/messaging        Message senders (Slack/Discord webhooks, SMS) + MessageDispatcher
 core/maps             MapLibre map wrapped for Compose (OpenFreeMap tiles)
 core/designsystem     Theme, colors, typography, shared composables (no domain types)
@@ -160,6 +162,67 @@ A place or recipient that a trigger still uses can't be deleted. The repository 
   other.
 - A distance you entered is always shown exactly as typed ("0.25 mi"). Measured distances
   are rounded ("1.8 mi").
+
+## Monitoring (the background part)
+
+```
+Room: ARMED triggers ─┐
+                      ├─▶ MonitoringEngine ──▶ fire ─▶ TriggerFirer ─▶ MessageDispatcher
+Location updates ─────┘     (pure Kotlin)    ├─▶ "already here?" notification
+  ▲ adaptive interval                        └─▶ live status notification + list UI
+  └──────────── next interval ◀──────────────┘
+```
+
+- **`MonitoringService`** is a foreground service of type `location`. It runs while at
+  least one trigger is armed and stops itself when none are. `MonitoringController` starts
+  it when triggers become armed, and `BootReceiver` restarts it after a reboot or an app
+  update.
+- **Adaptive checks.** The engine picks the next check interval from the nearest trigger:
+  10 s when close, up to the *Check location at least every* setting (30 s to 5 min) when
+  far away. The interval is snapped to a few fixed steps, so the location request is only
+  re-registered when the step actually changes.
+- **Sending at most once.** `TriggerFirer` changes the trigger from ARMED to FIRED in a
+  single atomic step before sending, records the attempt in the history, and posts
+  "Sent to Alex". Transient failures go to a WorkManager job (`SendRetryWorker`) that
+  survives reboots and process death. It backs off exponentially, waits for network for
+  webhooks, gives up after 5 attempts, and retries the text exactly as it was originally
+  rendered.
+- **"Already here."** If a trigger is armed while you're already past its line, it doesn't
+  fire. You get a notification with **Send now** and **Keep waiting**.
+- **Live notification.** It shows the trigger nearest to firing, as "1.8 mi to go · 3.8 mi
+  away" with a progress bar, plus **Send now**, **Pause** and **Stop all** buttons.
+  - On Android 16 it uses `ProgressStyle`.
+  - From Android 16 QPR2 (API 36.1) it is also a promoted *Live Update* with a status-bar
+    chip showing the distance left. These APIs are guarded at runtime with
+    `SDK_INT_FULL`, because calling them on 36.0 crashes.
+  - Older versions get a standard progress notification.
+- **Trigger list.** Watching triggers show their live distance. A banner asks for the most
+  important missing item, in this order:
+  1. Precise location (required)
+  2. Notifications (required)
+  3. "Allow all the time" (recommended)
+  4. Unrestricted battery (recommended)
+
+  The two recommended items can be dismissed with "Not now".
+
+### Permissions
+
+| Permission | Why |
+|---|---|
+| `ACCESS_FINE_LOCATION` | Radii can be as small as 25 m |
+| `ACCESS_BACKGROUND_LOCATION` | Restarting after a reboot, or starting from the background. Optional |
+| `FOREGROUND_SERVICE(_LOCATION)` | The monitoring service |
+| `POST_NOTIFICATIONS`, `POST_PROMOTED_NOTIFICATIONS` | Live status, alerts and Android 16 Live Updates |
+| `RECEIVE_BOOT_COMPLETED` | Resuming after a restart |
+| `SEND_SMS` (`full` only) | Sending texts automatically |
+
+**Play submission notes:**
+- **Background location:** this needs Google Play's background-location declaration,
+  including a short video of the feature.
+- **Battery settings:** the app opens the battery-optimisation *list* screen instead of
+  calling `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, which Play restricts.
+- **Aggressive OEMs:** some manufacturers (Samsung, Xiaomi, OnePlus and others) still kill
+  background services. See [dontkillmyapp.com](https://dontkillmyapp.com).
 
 ## Messaging
 

@@ -9,4 +9,6 @@ android {
 dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:maps"))
+    implementation(project(":core:monitoring"))
+    implementation(libs.androidx.activity.compose) // Permission launchers.
 }
