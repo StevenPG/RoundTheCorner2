@@ -9,6 +9,8 @@ import com.stevenpg.roundthecorner2.core.data.locale.IcuLocaleUnitSystemProvider
 import com.stevenpg.roundthecorner2.core.data.locale.LocaleUnitSystemProvider
 import com.stevenpg.roundthecorner2.core.data.preferences.DataStoreUserPreferencesRepository
 import com.stevenpg.roundthecorner2.core.data.preferences.UserPreferencesRepository
+import com.stevenpg.roundthecorner2.core.data.repository.GeocodingRepository
+import com.stevenpg.roundthecorner2.core.data.repository.NominatimGeocodingRepository
 import com.stevenpg.roundthecorner2.core.data.repository.PlaceRepository
 import com.stevenpg.roundthecorner2.core.data.repository.RecipientRepository
 import com.stevenpg.roundthecorner2.core.data.repository.RoomPlaceRepository
@@ -48,6 +50,9 @@ internal abstract class DataModule {
 
     @Binds
     abstract fun bindSendHistoryRepository(impl: RoomSendHistoryRepository): SendHistoryRepository
+
+    @Binds
+    abstract fun bindGeocodingRepository(impl: NominatimGeocodingRepository): GeocodingRepository
 
     @Binds
     abstract fun bindLocaleUnitSystemProvider(impl: IcuLocaleUnitSystemProvider): LocaleUnitSystemProvider

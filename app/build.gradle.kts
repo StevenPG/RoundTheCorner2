@@ -58,6 +58,24 @@ android {
         }
     }
 
+    /*
+     * MapLibre ships native code for every CPU architecture (~12 MB each).
+     * Play builds are uploaded as an App Bundle, which Play splits per device
+     * automatically. For sideloaded APKs we build one APK per architecture so
+     * a phone only downloads what it can run (arm64-v8a covers modern phones;
+     * x86_64 is for emulators). AGP can't split while bundling, so splits are
+     * switched off for `bundle*` tasks.
+     */
+    val buildingBundle = gradle.startParameter.taskNames.any { it.contains("bundle", ignoreCase = true) }
+    splits {
+        abi {
+            isEnable = !buildingBundle
+            reset()
+            include("arm64-v8a", "armeabi-v7a", "x86_64")
+            isUniversalApk = false
+        }
+    }
+
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
     }

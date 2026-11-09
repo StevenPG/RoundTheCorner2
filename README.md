@@ -10,7 +10,7 @@ place. The message can go out as an SMS, a Slack message or a Discord message.
 |---|-----------|-------|
 | 1 | Gradle skeleton, modules, Hilt, theme, navigation shell, Settings (units + theme), CI | ✅ |
 | 2 | Domain model, Room, distance + hysteresis logic | ✅ |
-| 3 | Places: manual lat/lng entry, address search (Nominatim), map picker (MapLibre/OSM), saved places | ⏳ |
+| 3 | Places: manual lat/lng entry, address search (Nominatim), map picker (MapLibre/OSM), saved places | ✅ |
 | 4 | Recipients + senders: SMS (per flavor), Slack webhook, Discord webhook | ⏳ |
 | 5 | Trigger list and editor | ⏳ |
 | 6 | Foreground monitoring service + live progress notification | ⏳ |
@@ -39,10 +39,13 @@ core/model            Pure-Kotlin domain types and coordinate parsing (no Androi
 core/domain           Pure-Kotlin logic: WGS84 distance, trigger state machine, polling, templates
 core/database         Room entities, DAOs, exported schemas (core/database/schemas)
 core/data             Repositories, the only data API that features use
-core/designsystem     Theme, colors, typography, shared composables
+core/network          OkHttp client and the Nominatim geocoding client
+core/maps             MapLibre map wrapped for Compose (OpenFreeMap tiles)
+core/designsystem     Theme, colors, typography, shared composables (no domain types)
+core/ui               Shared composables that use domain types (place icons, ...)
 core/testing          Fakes + screenshot helpers (test-only)
 feature/triggers      Triggers tab
-feature/places        Saved places tab
+feature/places        Saved places: list + editor (coordinates, search, map)
 feature/settings      Settings tab (distance units, theme)
 ```
 
@@ -106,8 +109,20 @@ Message placeholders: `{place}`, `{distance}`, `{radius}`, `{time}`.
 
 ## Places and coordinates
 
-A place needs only coordinates; an address is optional. `CoordinateParser` accepts
-whatever you paste from a map app:
+A place needs only a name and coordinates; an address is optional. The editor can get the
+location in three ways, and each one keeps the others in sync:
+
+1. **Coordinates field.** Works offline, and it's the only method that needs no network.
+   `CoordinateParser` accepts whatever you paste from a map app (examples below). The text
+   under the field shows how the input was read, e.g. `39.638611° N, 105.239167° W`.
+2. **Address search** with OpenStreetMap Nominatim. Searches wait for a 600 ms pause in
+   typing and are limited to one request per second, as Nominatim's usage policy requires.
+   Choosing a result fills in the coordinates and the address, and suggests a name.
+3. **Map.** The pin stays fixed at the center and you drag the map underneath it. A small
+   adjustment (under 150 m) keeps the address from the search; moving the pin further
+   clears it.
+
+Coordinate formats `CoordinateParser` accepts:
 
 ```
 40.7128, -74.0060            40.7128° N, 74.0060° W
@@ -116,6 +131,21 @@ whatever you paste from a map app:
 
 A place or recipient that a trigger still uses can't be deleted. The repository returns
 `DeleteResult.InUse(n)` instead of quietly deleting the triggers too.
+
+## Third-party services
+
+| Service | Used for | Key needed | Notes |
+|---|---|---|---|
+| [OpenFreeMap](https://openfreemap.org) | Map tiles (`liberty` and `dark` styles) | No | OpenStreetMap data; MapLibre shows the attribution |
+| [Nominatim](https://nominatim.org) | Address search | No | One request per second, and the app sends an identifying User-Agent |
+
+## APK size
+
+MapLibre includes native code for each CPU architecture, about 12 MB per architecture.
+Sideloaded builds therefore produce one APK per architecture: `arm64-v8a` for modern
+phones, `armeabi-v7a`, and `x86_64` for emulators. For example,
+`app/build/outputs/apk/full/release/app-full-arm64-v8a-release.apk`. Google Play builds use
+`./gradlew bundlePlayRelease`, and Play delivers each device only its own architecture.
 
 ## Settings
 

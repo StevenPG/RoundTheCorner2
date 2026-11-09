@@ -1,7 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- List -->
     <string name="places_title">Places</string>
     <string name="places_empty_title">No saved places</string>
     <string name="places_empty_body">Save the places you go often. Search an address, drop a pin, or enter exact coordinates, then reuse them in any trigger.</string>
     <string name="places_add">Add place</string>
+    <string name="places_more_actions">More actions for %1$s</string>
+    <string name="places_edit">Edit</string>
+    <string name="places_delete">Delete</string>
+    <string name="places_deleted">Deleted %1$s</string>
+    <plurals name="places_in_use">
+        <item quantity="one">%1$s is used by a trigger. Delete or change that trigger first.</item>
+        <item quantity="other">%1$s is used by %2$d triggers. Delete or change those triggers first.</item>
+    </plurals>
+    <string name="places_delete_confirm_title">Delete %1$s?</string>
+    <string name="places_delete_confirm_body">This place will be removed. Triggers that use it must be changed first.</string>
+    <string name="places_cancel">Cancel</string>
+
+    <!-- Editor -->
+    <string name="place_editor_new_title">New place</string>
+    <string name="place_editor_edit_title">Edit place</string>
+    <string name="place_editor_close">Close</string>
+    <string name="place_editor_save">Save</string>
+    <string name="place_editor_map_hint">Drag the map to move the pin</string>
+
+    <string name="place_editor_section_location">Location</string>
+    <string name="place_editor_search_label">Search for an address</string>
+    <string name="place_editor_search_clear">Clear search</string>
+    <string name="place_editor_search_no_results">No matches. Try a fuller address, or enter coordinates below.</string>
+    <string name="place_editor_search_failed">Address search is unavailable right now. You can still enter coordinates.</string>
+    <string name="place_editor_search_attribution">Search by OpenStreetMap Nominatim</string>
+
+    <string name="place_editor_coordinates_label">Coordinates</string>
+    <string name="place_editor_coordinates_placeholder">40.7128, -74.0060</string>
+    <string name="place_editor_coordinates_help">Latitude, longitude. Decimal or degrees-minutes-seconds, pasted from any map app.</string>
+    <string name="place_editor_coordinates_lat_range">Latitude must be between -90 and 90</string>
+    <string name="place_editor_coordinates_lng_range">Longitude must be between -180 and 180</string>
+
+    <string name="place_editor_section_details">Details</string>
+    <string name="place_editor_name_label">Name</string>
+    <string name="place_editor_name_placeholder">Home, Office, Mom\'s…</string>
+    <string name="place_editor_address_label">Address (optional)</string>
+    <string name="place_editor_icon_label">Icon</string>
+    <string name="place_editor_delete">Delete place</string>
 </resources>

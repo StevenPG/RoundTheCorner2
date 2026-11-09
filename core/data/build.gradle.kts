@@ -11,6 +11,7 @@ dependencies {
     api(project(":core:model"))
     api(project(":core:domain"))
     implementation(project(":core:database"))
+    implementation(project(":core:network"))
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.coroutines.android)
 

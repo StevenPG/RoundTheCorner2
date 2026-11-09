@@ -7,7 +7,10 @@
  *   :core:data            - repositories: the only API features use for data
  *   :core:database        - Room entities, DAOs, schema migrations
  *   :core:domain          - pure-Kotlin business logic (geodesy, trigger state machine)
- *   :core:designsystem    - theme, colors, typography, shared composables
+ *   :core:designsystem    - theme, colors, typography, shared composables (model-agnostic)
+ *   :core:ui              - shared composables that know the domain model (place icons, ...)
+ *   :core:maps            - MapLibre map wrapped for Compose (OpenFreeMap tiles)
+ *   :core:network         - OkHttp client + API clients (Nominatim geocoding)
  *   :core:model           - pure-Kotlin domain types (no Android imports)
  *   :core:testing         - fakes + screenshot helpers (test-only)
  *
@@ -44,6 +47,9 @@ include(":core:model")
 include(":core:domain")
 include(":core:designsystem")
 include(":core:database")
+include(":core:network")
+include(":core:maps")
+include(":core:ui")
 include(":core:data")
 include(":core:testing")
 include(":feature:triggers")

@@ -4,8 +4,11 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -35,8 +38,13 @@ fun RoundTheCornerApp(
     // At a non-start tab's root, Back goes to the start tab before exiting.
     BackHandler(enabled = navigationState.shouldReturnToStartTab) { navigationState.goBack() }
 
+    // Detail screens (editors) are full-screen: hide the bar/rail while one is open.
+    val adaptiveLayout = NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfoV2())
+    val layoutType = if (navigationState.isAtTabRoot) adaptiveLayout else NavigationSuiteType.None
+
     NavigationSuiteScaffold(
         modifier = modifier,
+        layoutType = layoutType,
         navigationSuiteItems = {
             TopLevelDestination.entries.forEach { destination ->
                 val selected = destination == navigationState.currentDestination
@@ -69,9 +77,9 @@ fun RoundTheCornerApp(
                 rememberViewModelStoreNavEntryDecorator(),
             ),
             entryProvider = entryProvider {
-                // TODO(milestone 3/5): navigate to the place / trigger editors.
+                // TODO(milestone 5): navigate to the trigger editor.
                 triggersEntries(onAddTrigger = {})
-                placesEntries(onAddPlace = {})
+                placesEntries(navigate = navigationState::navigate, goBack = navigationState::goBack)
                 settingsEntry()
             },
         )

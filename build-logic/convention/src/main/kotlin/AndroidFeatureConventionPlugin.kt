@@ -7,7 +7,7 @@ import org.gradle.kotlin.dsl.dependencies
 
 /**
  * One-stop plugin for `feature:*` modules: Android library + Compose + Hilt,
- * plus the dependencies every screen needs (design system, domain model,
+ * plus the dependencies every screen needs (design system, shared UI, domain model,
  * ViewModel/lifecycle integration, Navigation 3 keys).
  *
  * Feature modules must never depend on each other; the app module wires them.
@@ -21,6 +21,7 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
 
         dependencies {
             add("implementation", project(":core:designsystem"))
+            add("implementation", project(":core:ui"))
             add("implementation", project(":core:model"))
 
             add("implementation", libs.library("androidx-lifecycle-runtime-compose"))

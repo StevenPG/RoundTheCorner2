@@ -31,6 +31,10 @@ class AppNavigationState internal constructor(
     val currentBackStack: NavBackStack<NavKey>
         get() = stacks.getValue(currentDestination)
 
+    /** True when the current tab shows its root screen (no detail screen on top). */
+    val isAtTabRoot: Boolean
+        get() = currentBackStack.size <= 1
+
     /** True when system Back should switch to the start tab instead of exiting. */
     val shouldReturnToStartTab: Boolean
         get() = currentDestination != TopLevelDestination.START && currentBackStack.size <= 1
