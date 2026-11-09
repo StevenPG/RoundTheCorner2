@@ -9,12 +9,21 @@ import com.stevenpg.roundthecorner2.core.data.locale.IcuLocaleUnitSystemProvider
 import com.stevenpg.roundthecorner2.core.data.locale.LocaleUnitSystemProvider
 import com.stevenpg.roundthecorner2.core.data.preferences.DataStoreUserPreferencesRepository
 import com.stevenpg.roundthecorner2.core.data.preferences.UserPreferencesRepository
+import com.stevenpg.roundthecorner2.core.data.repository.PlaceRepository
+import com.stevenpg.roundthecorner2.core.data.repository.RecipientRepository
+import com.stevenpg.roundthecorner2.core.data.repository.RoomPlaceRepository
+import com.stevenpg.roundthecorner2.core.data.repository.RoomRecipientRepository
+import com.stevenpg.roundthecorner2.core.data.repository.RoomSendHistoryRepository
+import com.stevenpg.roundthecorner2.core.data.repository.RoomTriggerRepository
+import com.stevenpg.roundthecorner2.core.data.repository.SendHistoryRepository
+import com.stevenpg.roundthecorner2.core.data.repository.TriggerRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.time.Clock
 import javax.inject.Singleton
 
 /**
@@ -29,9 +38,26 @@ internal abstract class DataModule {
     abstract fun bindUserPreferencesRepository(impl: DataStoreUserPreferencesRepository): UserPreferencesRepository
 
     @Binds
+    abstract fun bindPlaceRepository(impl: RoomPlaceRepository): PlaceRepository
+
+    @Binds
+    abstract fun bindRecipientRepository(impl: RoomRecipientRepository): RecipientRepository
+
+    @Binds
+    abstract fun bindTriggerRepository(impl: RoomTriggerRepository): TriggerRepository
+
+    @Binds
+    abstract fun bindSendHistoryRepository(impl: RoomSendHistoryRepository): SendHistoryRepository
+
+    @Binds
     abstract fun bindLocaleUnitSystemProvider(impl: IcuLocaleUnitSystemProvider): LocaleUnitSystemProvider
 
     companion object {
+        /** Injected wherever "now" is needed, so tests can control time. */
+        @Provides
+        @Singleton
+        fun provideClock(): Clock = Clock.systemUTC()
+
         /** Exactly one DataStore per file per process - DataStore enforces this. */
         @Provides
         @Singleton

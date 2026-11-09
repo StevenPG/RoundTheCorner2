@@ -4,7 +4,9 @@
  * Module map (dependencies only point "down" this list):
  *   :app                  - entry point; wires features, DI graph, navigation
  *   :feature:*            - one module per user-facing area; never depend on each other
- *   :core:data            - repositories (DataStore today; Room in milestone 2)
+ *   :core:data            - repositories: the only API features use for data
+ *   :core:database        - Room entities, DAOs, schema migrations
+ *   :core:domain          - pure-Kotlin business logic (geodesy, trigger state machine)
  *   :core:designsystem    - theme, colors, typography, shared composables
  *   :core:model           - pure-Kotlin domain types (no Android imports)
  *   :core:testing         - fakes + screenshot helpers (test-only)
@@ -39,7 +41,9 @@ rootProject.name = "RoundTheCorner2"
 
 include(":app")
 include(":core:model")
+include(":core:domain")
 include(":core:designsystem")
+include(":core:database")
 include(":core:data")
 include(":core:testing")
 include(":feature:triggers")
