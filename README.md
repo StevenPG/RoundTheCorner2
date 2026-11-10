@@ -17,6 +17,9 @@ place. The message can go out as an SMS, a Slack message or a Discord message.
 | 7 | UI review loop | ⏳ |
 | 8 | Device-testing guide | ⏳ |
 
+**Running it locally:** see [docs/LOCAL_DEVELOPMENT.md](docs/LOCAL_DEVELOPMENT.md) for Android Studio setup, build variants,
+simulating a drive in the emulator, and `adb` commands for testing.
+
 ## Tech stack
 
 - **Kotlin 2.4** and **Coroutines/Flow**
