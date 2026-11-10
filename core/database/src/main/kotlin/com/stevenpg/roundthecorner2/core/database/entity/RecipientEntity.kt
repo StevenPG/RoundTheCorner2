@@ -4,17 +4,16 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.stevenpg.roundthecorner2.core.model.MessageChannel
-import com.stevenpg.roundthecorner2.core.model.Recipient
-import com.stevenpg.roundthecorner2.core.model.RecipientDestination
-import com.stevenpg.roundthecorner2.core.model.RecipientId
 import java.time.Instant
 
 /**
  * `recipients` table. The destination is flattened to (channel, address) -
  * a phone number for SMS or a webhook URL for Slack/Discord.
  *
- * Note: webhook URLs are bearer secrets. The messaging milestone encrypts the
- * `address` column with an Android Keystore key before it is written here.
+ * `address` holds ciphertext (phone numbers and webhook URLs are encrypted with
+ * an Android Keystore key), so there is intentionally no mapper to the domain
+ * model here: `core:data` owns the cipher and maps recipients with
+ * `toDecryptedModel`, the single place that decrypts.
  */
 @Entity(tableName = "recipients")
 data class RecipientEntity(
@@ -23,11 +22,4 @@ data class RecipientEntity(
     val channel: MessageChannel,
     val address: String,
     @ColumnInfo(name = "created_at") val createdAt: Instant,
-)
-
-fun RecipientEntity.asExternalModel() = Recipient(
-    id = RecipientId(id),
-    name = name,
-    destination = RecipientDestination.of(channel, address),
-    createdAt = createdAt,
 )

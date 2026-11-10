@@ -11,7 +11,6 @@ import com.stevenpg.roundthecorner2.core.model.Distance
 import com.stevenpg.roundthecorner2.core.model.PlaceId
 import com.stevenpg.roundthecorner2.core.model.RecipientId
 import com.stevenpg.roundthecorner2.core.model.Trigger
-import com.stevenpg.roundthecorner2.core.model.TriggerDetails
 import com.stevenpg.roundthecorner2.core.model.TriggerDirection
 import com.stevenpg.roundthecorner2.core.model.TriggerId
 import com.stevenpg.roundthecorner2.core.model.TriggerStatus
@@ -77,10 +76,4 @@ data class TriggerWithRelations(
     val place: PlaceEntity,
     @Relation(parentColumn = "recipient_id", entityColumn = "id")
     val recipient: RecipientEntity,
-)
-
-fun TriggerWithRelations.asExternalModel() = TriggerDetails(
-    trigger = trigger.asExternalModel(),
-    place = place.asExternalModel(),
-    recipient = recipient.asExternalModel(),
 )

@@ -45,7 +45,7 @@ class RepositoryTest {
     private val key = javax.crypto.KeyGenerator.getInstance("AES").apply { init(256) }.generateKey()
     private val cipher = AesGcmSecretCipher { key }
     private val recipients = RoomRecipientRepository(db.recipientDao(), clock, cipher)
-    private val triggers = RoomTriggerRepository(db.triggerDao(), clock)
+    private val triggers = RoomTriggerRepository(db.triggerDao(), clock, cipher)
     private val history = RoomSendHistoryRepository(db.sendAttemptDao(), clock)
 
     @After
@@ -152,6 +152,34 @@ class RepositoryTest {
         assertEquals(id, armed.trigger.id)
         assertEquals("Home", armed.place.name)
         assertEquals(TriggerStatus.ARMED, armed.trigger.status)
+    }
+
+    // Regression: triggers load their recipient through a Room @Relation, which
+    // bypassed RoomRecipientRepository's decryption, so a fired trigger sent to
+    // the ciphertext (an SMS went to the ciphertext's digits) instead of the number.
+    @Test
+    fun `trigger details carry the decrypted recipient address`() = runTest {
+        val id = newTrigger()
+        val expected = "+1 555 555 0100"
+        val fromAll = triggers.observeTriggers().first().single().recipient
+        val fromArmed = triggers.observeArmedTriggers().first().single().recipient
+        val fromOne = triggers.observeTrigger(id).first()!!.recipient
+        for (r in listOf(fromAll, fromArmed, fromOne)) {
+            assertEquals(expected, r.destination.address)
+            assertFalse(r.needsReentry)
+        }
+    }
+
+    @Test
+    fun `trigger with an undecryptable recipient flags it instead of sending ciphertext`() = runTest {
+        val id = newTrigger()
+        val otherPhone = RoomTriggerRepository(
+            db.triggerDao(), clock,
+            AesGcmSecretCipher { javax.crypto.KeyGenerator.getInstance("AES").apply { init(256) }.generateKey() },
+        )
+        val recipient = otherPhone.observeTrigger(id).first()!!.recipient
+        assertTrue(recipient.needsReentry)
+        assertEquals("", recipient.destination.address)
     }
 
     @Test

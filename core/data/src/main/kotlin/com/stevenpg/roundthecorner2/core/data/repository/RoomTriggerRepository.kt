@@ -1,5 +1,6 @@
 package com.stevenpg.roundthecorner2.core.data.repository
 
+import com.stevenpg.roundthecorner2.core.data.security.SecretCipher
 import com.stevenpg.roundthecorner2.core.database.dao.TriggerDao
 import com.stevenpg.roundthecorner2.core.database.entity.TriggerEntity
 import com.stevenpg.roundthecorner2.core.database.entity.TriggerWithRelations
@@ -17,20 +18,21 @@ import javax.inject.Inject
 internal class RoomTriggerRepository @Inject constructor(
     private val dao: TriggerDao,
     private val clock: Clock,
+    private val cipher: SecretCipher,
 ) : TriggerRepository {
 
     override fun observeTriggers(): Flow<List<TriggerDetails>> =
-        dao.observeAllWithRelations().map { it.map(TriggerWithRelations::asExternalModel) }
+        dao.observeAllWithRelations().map { it.map { row -> row.toDetails() } }
 
     // distinctUntilChanged: Room re-emits on *any* write to the table; the
     // monitoring service only cares when the armed set actually changes.
     override fun observeArmedTriggers(): Flow<List<TriggerDetails>> =
         dao.observeByStatusWithRelations(TriggerStatus.ARMED)
-            .map { it.map(TriggerWithRelations::asExternalModel) }
+            .map { it.map { row -> row.toDetails() } }
             .distinctUntilChanged()
 
     override fun observeTrigger(id: TriggerId): Flow<TriggerDetails?> =
-        dao.observeByIdWithRelations(id.value).map { it?.asExternalModel() }
+        dao.observeByIdWithRelations(id.value).map { it?.toDetails() }
 
     override suspend fun createTrigger(draft: TriggerDraft, armed: Boolean): TriggerId {
         val entity = draft.toEntity(
@@ -54,6 +56,14 @@ internal class RoomTriggerRepository @Inject constructor(
     override suspend fun markFired(id: TriggerId): Boolean = dao.markFiredIfArmed(id.value, clock.instant()) > 0
 
     override suspend fun deleteTrigger(id: TriggerId): Boolean = dao.deleteById(id.value) > 0
+
+    // The recipient comes from a Room @Relation, so it must be decrypted here too;
+    // see toDecryptedModel for why core:database has no mapper of its own.
+    private fun TriggerWithRelations.toDetails() = TriggerDetails(
+        trigger = trigger.asExternalModel(),
+        place = place.asExternalModel(),
+        recipient = recipient.toDecryptedModel(cipher),
+    )
 
     private fun TriggerDraft.toEntity(id: Long, status: TriggerStatus, createdAt: Instant, lastFiredAt: Instant?) =
         TriggerEntity(
