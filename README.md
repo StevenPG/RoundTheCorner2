@@ -14,7 +14,7 @@ place. The message can go out as an SMS, a Slack message or a Discord message.
 | 4 | Recipients + senders: SMS (per flavor), Slack webhook, Discord webhook | ✅ |
 | 5 | Trigger list and editor | ✅ |
 | 6 | Foreground monitoring service + live progress notification | ✅ |
-| 7 | UI review loop | ⏳ |
+| 7 | UI review loop | 🟡 in progress (see CLAUDE.md backlog) |
 | 8 | Device-testing guide | ⏳ |
 
 **Running it locally:** see [docs/LOCAL_DEVELOPMENT.md](docs/LOCAL_DEVELOPMENT.md) for Android Studio setup, build variants,
