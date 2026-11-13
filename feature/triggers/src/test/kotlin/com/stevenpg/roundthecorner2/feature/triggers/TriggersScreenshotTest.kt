@@ -79,6 +79,7 @@ class TriggersScreenshotTest {
             TriggersUiState.Ready(TestData.listDetails, ResolvedUnitSystem.IMPERIAL),
             {}, {}, { _, _ -> }, {},
             zone = ZoneOffset.UTC,
+            today = TestData.today,
         )
     }
 
@@ -94,6 +95,7 @@ class TriggersScreenshotTest {
             ),
             {}, {}, { _, _ -> }, {},
             zone = ZoneOffset.UTC,
+            today = TestData.today,
         )
     }
 
@@ -136,6 +138,7 @@ class TriggersScreenshotTest {
             ),
             onAction = {}, onClose = {}, onCreatePlace = {}, onCreateRecipient = {}, mapContent = fakeMap,
             zone = ZoneOffset.UTC,
+            today = TestData.today,
         )
     }
 }

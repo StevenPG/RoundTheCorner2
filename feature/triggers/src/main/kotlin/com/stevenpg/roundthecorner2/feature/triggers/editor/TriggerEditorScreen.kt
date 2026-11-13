@@ -84,6 +84,7 @@ import com.stevenpg.roundthecorner2.core.ui.ChannelBadge
 import com.stevenpg.roundthecorner2.core.ui.PlaceIconBadge
 import com.stevenpg.roundthecorner2.feature.triggers.R
 import com.stevenpg.roundthecorner2.feature.triggers.formatWhen
+import java.time.LocalDate
 import java.time.ZoneId
 
 /** Map slot (see the Places editor): screenshot tests swap in a placeholder for MapLibre. */
@@ -128,6 +129,7 @@ fun TriggerEditorScreen(
     modifier: Modifier = Modifier,
     mapContent: RadiusMapContent = DefaultRadiusMap,
     zone: ZoneId = ZoneId.systemDefault(),
+    today: LocalDate = LocalDate.now(zone),
 ) {
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
 
@@ -204,7 +206,7 @@ fun TriggerEditorScreen(
 
                 if (!uiState.isNew) {
                     SectionHeader(stringResource(R.string.trigger_editor_section_history))
-                    History(uiState.history, zone)
+                    History(uiState.history, zone, today)
                     TextButton(
                         onClick = { confirmDelete = true },
                         modifier = Modifier.fillMaxWidth().padding(top = Spacing.lg),
@@ -475,7 +477,7 @@ private fun MessageEditor(uiState: TriggerEditorUiState, onAction: (TriggerEdito
 }
 
 @Composable
-private fun History(history: List<SendAttempt>, zone: ZoneId) {
+private fun History(history: List<SendAttempt>, zone: ZoneId, today: LocalDate) {
     if (history.isEmpty()) {
         Text(
             stringResource(R.string.trigger_editor_history_empty),
@@ -494,19 +496,19 @@ private fun History(history: List<SendAttempt>, zone: ZoneId) {
                     SendStatus.AWAITING_USER -> Icons.Outlined.HourglassTop to MaterialTheme.colorScheme.tertiary
                     SendStatus.FAILED -> Icons.Outlined.ErrorOutline to MaterialTheme.colorScheme.error
                 }
-                HistoryRow(icon, tint, attempt, zone)
+                HistoryRow(icon, tint, attempt, zone, today)
             }
         }
     }
 }
 
 @Composable
-private fun HistoryRow(icon: ImageVector, tint: Color, attempt: SendAttempt, zone: ZoneId) {
+private fun HistoryRow(icon: ImageVector, tint: Color, attempt: SendAttempt, zone: ZoneId, today: LocalDate) {
     Row(Modifier.fillMaxWidth().padding(horizontal = Spacing.lg, vertical = Spacing.sm), verticalAlignment = Alignment.Top) {
         Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.padding(top = 2.dp).size(20.dp))
         Spacer(Modifier.width(Spacing.lg))
         Column {
-            Text(formatWhen(attempt.timestamp, zone), style = MaterialTheme.typography.labelLarge)
+            Text(formatWhen(attempt.timestamp, zone, today), style = MaterialTheme.typography.labelLarge)
             Text(
                 when (attempt.status) {
                     SendStatus.FAILED -> attempt.error ?: attempt.renderedMessage

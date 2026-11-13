@@ -17,9 +17,14 @@ import com.stevenpg.roundthecorner2.core.model.TriggerId
 import com.stevenpg.roundthecorner2.core.model.TriggerStatus
 import com.stevenpg.roundthecorner2.core.model.miles
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
 
 internal object TestData {
     val now: Instant = Instant.parse("2026-11-09T17:42:00Z")
+
+    /** The calendar day of [now] in UTC, so screenshots don't depend on the real date. */
+    val today: LocalDate = now.atZone(ZoneOffset.UTC).toLocalDate()
 
     val home = Place(PlaceId(1), "Home", PlaceIcon.HOME, Coordinates(39.7392, -104.9903), "1437 Bannock St, Denver", Instant.EPOCH)
     val office = Place(PlaceId(2), "Office", PlaceIcon.WORK, Coordinates(39.7508, -104.9966), null, Instant.EPOCH)

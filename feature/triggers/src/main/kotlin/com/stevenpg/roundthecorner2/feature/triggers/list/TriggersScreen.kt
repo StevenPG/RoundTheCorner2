@@ -69,6 +69,7 @@ import com.stevenpg.roundthecorner2.core.model.TriggerStatus
 import com.stevenpg.roundthecorner2.core.ui.PlaceIconBadge
 import com.stevenpg.roundthecorner2.feature.triggers.R
 import com.stevenpg.roundthecorner2.feature.triggers.formatWhen
+import java.time.LocalDate
 import java.time.ZoneId
 
 @Composable
@@ -111,6 +112,7 @@ fun TriggersScreen(
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     zone: ZoneId = ZoneId.systemDefault(),
+    today: LocalDate = LocalDate.now(zone),
     onFixRequirement: (MonitoringRequirement) -> Unit = {},
     onDismissRequirement: (MonitoringRequirement) -> Unit = {},
 ) {
@@ -180,6 +182,7 @@ fun TriggersScreen(
                                     else -> null
                                 },
                                 zone = zone,
+                                today = today,
                                 onClick = { onEditTrigger(details.trigger.id) },
                                 onWatchingChange = { onWatchingChange(details.trigger.id, it) },
                                 onDelete = { onDelete(details.trigger.id) },
@@ -202,6 +205,7 @@ private fun TriggerCard(
     radiusText: String,
     liveText: String?,
     zone: ZoneId,
+    today: LocalDate,
     onClick: () -> Unit,
     onWatchingChange: (Boolean) -> Unit,
     onDelete: () -> Unit,
@@ -256,7 +260,7 @@ private fun TriggerCard(
                             TriggerStatus.PAUSED -> stringResource(R.string.triggers_status_paused)
                             TriggerStatus.FIRED -> stringResource(
                                 R.string.triggers_status_fired,
-                                trigger.lastFiredAt?.let { formatWhen(it, zone) }.orEmpty(),
+                                trigger.lastFiredAt?.let { formatWhen(it, zone, today) }.orEmpty(),
                             )
                         },
                         color = if (armed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
