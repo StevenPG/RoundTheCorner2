@@ -1,0 +1,50 @@
+# Builds both distribution flavors, runs JVM unit tests, and verifies the
+# Roborazzi screenshot baselines committed under */src/test/screenshots/.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: "true" # Turns Kotlin warnings into errors (see build-logic).
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # Caches Gradle dependencies/build cache and validates the wrapper jar.
+      - uses: gradle/actions/setup-gradle@v5
+
+      - name: Build debug APKs (play + full)
+        run: ./gradlew assemblePlayDebug assembleFullDebug
+
+      - name: Unit + screenshot tests
+        run: >
+          ./gradlew :core:model:test :core:domain:test testDebugUnitTest :app:testPlayDebugUnitTest :app:testFullDebugUnitTest
+          -Proborazzi.test.verify=true
+
+      - name: Upload screenshot diffs
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: roborazzi-diffs
+          path: "**/build/outputs/roborazzi/"
+
+      - name: Upload debug APKs
+        uses: actions/upload-artifact@v5
+        with:
+          name: debug-apks
+          path: app/build/outputs/apk/**/debug/*.apk

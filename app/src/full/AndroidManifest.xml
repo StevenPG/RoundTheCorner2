@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    FULL (sideload) flavor only. Merged on top of src/main/AndroidManifest.xml.
+    SEND_SMS lets triggers text automatically. It is deliberately absent from
+    the play flavor: Google Play rejects apps declaring it unless they are the
+    default SMS handler.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.SEND_SMS" />
+</manifest>

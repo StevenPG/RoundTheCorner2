@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Webhook delivery. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Background SMS hand-off notifications (play flavor) and, later, the monitoring notification. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Lets the "open messaging app" intent resolve under package-visibility rules. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="smsto" />
+        </intent>
+    </queries>
+</manifest>

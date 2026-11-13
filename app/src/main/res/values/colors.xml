@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Only used by XML (launcher icon, splash). Compose colors live in core:designsystem. -->
+    <color name="brand_teal">#006A6A</color>
+    <color name="brand_teal_light">#9CF1F0</color>
+    <color name="brand_amber">#FFB870</color>
+    <color name="splash_background">#F4FBFA</color>
+</resources>

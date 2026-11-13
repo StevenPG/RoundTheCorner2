@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="place_icon_pin">Pin</string>
+    <string name="place_icon_home">Home</string>
+    <string name="place_icon_work">Work</string>
+    <string name="place_icon_school">School</string>
+    <string name="place_icon_family">Family</string>
+    <string name="place_icon_friend">Friend</string>
+    <string name="place_icon_gym">Gym</string>
+    <string name="place_icon_shop">Shop</string>
+    <string name="place_icon_restaurant">Food</string>
+    <string name="place_icon_travel">Travel</string>
+
+    <string name="channel_sms">Text message</string>
+    <string name="channel_slack">Slack</string>
+    <string name="channel_discord">Discord</string>
+</resources>

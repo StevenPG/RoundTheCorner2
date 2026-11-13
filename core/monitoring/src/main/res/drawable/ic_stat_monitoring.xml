@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status-bar icon for active monitoring: a pin with "signal" arcs. Single color; the system tints it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M12,6C9.79,6 8,7.79 8,10c0,3 4,7.5 4,7.5s4,-4.5 4,-7.5C16,7.79 14.21,6 12,6zM12,11.5c-0.83,0 -1.5,-0.67 -1.5,-1.5S11.17,8.5 12,8.5s1.5,0.67 1.5,1.5S12.83,11.5 12,11.5z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M4.93,4.93l1.41,1.41C4.89,7.79 4,9.79 4,12h-2C2,9.24 3.12,6.74 4.93,4.93zM19.07,4.93C20.88,6.74 22,9.24 22,12h-2c0,-2.21 -0.89,-4.21 -2.34,-5.66L19.07,4.93z" />
+</vector>

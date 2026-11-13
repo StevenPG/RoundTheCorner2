@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Channels -->
+    <string name="monitor_channel_status">Live distance</string>
+    <string name="monitor_channel_status_description">Shows how far you are from your armed triggers while they\'re being watched.</string>
+    <string name="monitor_channel_events">Trigger alerts</string>
+    <string name="monitor_channel_events_description">When a message is sent, can\'t be sent, or a trigger needs your decision.</string>
+
+    <!-- Status notification -->
+    <string name="monitor_starting">Starting location monitoring…</string>
+    <string name="monitor_title_arrive">Arrive at %1$s</string>
+    <string name="monitor_title_leave">Leave %1$s</string>
+    <string name="monitor_to_go">%1$s to go · %2$s away</string>
+    <string name="monitor_waiting_for_gps">Waiting for an accurate GPS fix…</string>
+    <string name="monitor_and_more">+%1$d more</string>
+    <string name="monitor_action_send_now">Send now</string>
+    <string name="monitor_action_pause">Pause</string>
+    <string name="monitor_action_stop_all">Stop all</string>
+
+    <!-- Event notifications -->
+    <string name="monitor_sent_title">Sent to %1$s</string>
+    <string name="monitor_retry_title">Couldn\'t reach %1$s yet</string>
+    <string name="monitor_retry_text">Retrying automatically. %1$s</string>
+    <string name="monitor_failed_title">Couldn\'t send to %1$s</string>
+    <string name="monitor_already_here_arrive_title">Already near %1$s</string>
+    <string name="monitor_already_here_leave_title">Already away from %1$s</string>
+    <string name="monitor_already_here_text">You were already on the far side of this trigger\'s distance when it was armed, so it hasn\'t sent. Send now, or wait for the next time you cross it.</string>
+    <string name="monitor_action_keep_waiting">Keep waiting</string>
+    <string name="monitor_permission_title">Location access needed</string>
+    <string name="monitor_permission_text">Monitoring stopped because location access was turned off. Open the app to allow it.</string>
+</resources>

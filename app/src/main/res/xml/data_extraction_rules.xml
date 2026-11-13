@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Android 12+ backup / device-transfer rules.
+    Settings, places and triggers are backed up. Recipient phone numbers and
+    webhook URLs are encrypted with a Keystore key that never leaves the device,
+    so after a restore those recipients show "re-enter details" (handled in
+    RoomRecipientRepository) - secrets can't leak via backups.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="database" path="round_the_corner.db" />
+        <include domain="file" path="datastore/" />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="database" path="round_the_corner.db" />
+        <include domain="file" path="datastore/" />
+    </device-transfer>
+</data-extraction-rules>

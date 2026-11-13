@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Settings</string>
+
+    <string name="settings_section_units">Distance units</string>
+    <string name="settings_units_system">Automatic</string>
+    <string name="settings_units_system_summary_metric">Kilometers · based on your region</string>
+    <string name="settings_units_system_summary_imperial">Miles · based on your region</string>
+    <string name="settings_units_metric">Metric</string>
+    <string name="settings_units_metric_summary">Kilometers and meters</string>
+    <string name="settings_units_imperial">Imperial</string>
+    <string name="settings_units_imperial_summary">Miles and feet</string>
+
+    <string name="settings_section_monitoring">Monitoring</string>
+    <string name="settings_check_interval">Check location at least every</string>
+    <string name="settings_check_interval_summary">How often to check while you\'re far away. Checks speed up automatically as you get close. Longer saves battery.</string>
+    <string name="settings_interval_30s">30 s</string>
+    <string name="settings_interval_1m">1 min</string>
+    <string name="settings_interval_2m">2 min</string>
+    <string name="settings_interval_5m">5 min</string>
+
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_dynamic_color">Wallpaper colors</string>
+    <string name="settings_dynamic_color_summary">Match the app to your wallpaper</string>
+
+    <string name="settings_section_about">About</string>
+    <string name="settings_version">Version</string>
+</resources>
