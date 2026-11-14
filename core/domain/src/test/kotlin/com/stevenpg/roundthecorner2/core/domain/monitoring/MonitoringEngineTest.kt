@@ -1,5 +1,6 @@
 package com.stevenpg.roundthecorner2.core.domain.monitoring
 
+import com.stevenpg.roundthecorner2.core.domain.polling.LocationAccuracy
 import com.stevenpg.roundthecorner2.core.domain.polling.PollingPolicy
 import com.stevenpg.roundthecorner2.core.domain.proximity.LocationFix
 import com.stevenpg.roundthecorner2.core.domain.proximity.ProximityConfig
@@ -18,6 +19,7 @@ import com.stevenpg.roundthecorner2.core.model.TriggerId
 import com.stevenpg.roundthecorner2.core.model.TriggerStatus
 import com.stevenpg.roundthecorner2.core.model.meters
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -113,5 +115,47 @@ class MonitoringEngineTest {
         assertTrue(tick.waitingForAccuracy)
         assertNull(tick.progress.single().remaining)
         assertEquals(10.seconds, tick.nextInterval)
+    }
+
+    @Test
+    fun `far away with a precise fix asks for low-power location next`() {
+        val tick = engine.onFix(listOf(trigger(1, home)), fixAt(10_000.0))
+        assertEquals(LocationAccuracy.LOW_POWER, tick.nextAccuracy)
+        assertEquals(60.seconds, tick.nextInterval)
+    }
+
+    @Test
+    fun `a coarse fix far away still gives a conservative distance and a slow interval`() {
+        val t = trigger(1, home) // 500 m radius: fixes worse than 250 m fail the accuracy gate.
+        val tick = engine.onFix(listOf(t), fixAt(20_000.0, accuracy = 1_500.0))
+        assertEquals(LocationAccuracy.LOW_POWER, tick.nextAccuracy)
+        assertEquals(60.seconds, tick.nextInterval)
+        assertFalse(tick.waitingForAccuracy)
+        // 20,000 m away - 500 m radius - 1,500 m uncertainty.
+        assertEquals(18_000.0, tick.progress.single().remaining!!.meters, 5.0)
+    }
+
+    @Test
+    fun `a coarse fix that might be close switches back to precise`() {
+        val t = trigger(1, home)
+        engine.onFix(listOf(t), fixAt(20_000.0, accuracy = 1_500.0))
+        // 3,500 - 500 - 1,000 = 2,000 m worst case: inside the 3 km precise zone.
+        val tick = engine.onFix(listOf(t), fixAt(3_500.0, accuracy = 1_000.0))
+        assertEquals(LocationAccuracy.PRECISE, tick.nextAccuracy)
+    }
+
+    @Test
+    fun `coarse fixes never fire a trigger`() {
+        val t = trigger(1, home)
+        engine.onFix(listOf(t), fixAt(20_000.0, accuracy = 1_500.0))
+        assertTrue(engine.onFix(listOf(t), fixAt(0.0, accuracy = 1_500.0)).toFire.isEmpty())
+        assertTrue(engine.onFix(listOf(t), fixAt(0.0, accuracy = 1_500.0)).toFire.isEmpty())
+    }
+
+    @Test
+    fun `reset goes back to precise`() {
+        engine.onFix(listOf(trigger(1, home)), fixAt(10_000.0))
+        engine.reset()
+        assertEquals(LocationAccuracy.PRECISE, engine.onFix(listOf(trigger(1, home)), fixAt(1_000.0, accuracy = 900.0)).nextAccuracy)
     }
 }

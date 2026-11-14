@@ -8,6 +8,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.stevenpg.roundthecorner2.core.domain.polling.LocationAccuracy
 import com.stevenpg.roundthecorner2.core.domain.proximity.LocationFix
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
@@ -25,9 +26,14 @@ internal class FusedLocationClient @Inject constructor(
 ) : LocationClient {
 
     @SuppressLint("MissingPermission") // Documented precondition; SecurityException surfaces through the flow.
-    override fun updates(interval: Duration): Flow<LocationFix> = callbackFlow {
+    override fun updates(interval: Duration, accuracy: LocationAccuracy): Flow<LocationFix> = callbackFlow {
         val client = LocationServices.getFusedLocationProviderClient(context)
-        val request = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, interval.inWholeMilliseconds)
+        val priority = when (accuracy) {
+            LocationAccuracy.PRECISE -> Priority.PRIORITY_HIGH_ACCURACY
+            // Wi-Fi and cell only: no GPS, a fraction of the power.
+            LocationAccuracy.LOW_POWER -> Priority.PRIORITY_BALANCED_POWER_ACCURACY
+        }
+        val request = LocationRequest.Builder(priority, interval.inWholeMilliseconds)
             // Accept fixes up to twice as often if another app already has GPS running (free for us).
             .setMinUpdateIntervalMillis(interval.inWholeMilliseconds / 2)
             .setWaitForAccurateLocation(false)

@@ -6,6 +6,7 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Build
 import android.os.Looper
+import com.stevenpg.roundthecorner2.core.domain.polling.LocationAccuracy
 import com.stevenpg.roundthecorner2.core.domain.proximity.LocationFix
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
@@ -24,9 +25,12 @@ internal class PlatformLocationClient @Inject constructor(
 ) : LocationClient {
 
     @SuppressLint("MissingPermission")
-    override fun updates(interval: Duration): Flow<LocationFix> = callbackFlow {
+    override fun updates(interval: Duration, accuracy: LocationAccuracy): Flow<LocationFix> = callbackFlow {
         val manager = context.getSystemService(LocationManager::class.java)
-        val provider = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+        val provider = if (accuracy == LocationAccuracy.LOW_POWER && manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            // Wi-Fi and cell positioning, no GPS. If it's missing or switched off, fall through to precise.
+            LocationManager.NETWORK_PROVIDER
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
             manager.hasProvider(LocationManager.FUSED_PROVIDER)
         ) {
             LocationManager.FUSED_PROVIDER

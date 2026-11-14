@@ -1,5 +1,7 @@
 package com.stevenpg.roundthecorner2.core.domain.monitoring
 
+import com.stevenpg.roundthecorner2.core.domain.geo.Geodesy
+import com.stevenpg.roundthecorner2.core.domain.polling.LocationAccuracy
 import com.stevenpg.roundthecorner2.core.domain.polling.PollingPolicy
 import com.stevenpg.roundthecorner2.core.domain.proximity.LocationFix
 import com.stevenpg.roundthecorner2.core.domain.proximity.Outcome
@@ -21,6 +23,12 @@ import kotlin.time.Duration
  *
  * Per-trigger state is reset whenever a trigger's geometry changes (edited) or
  * it stops being armed (fired/paused), so re-arming always starts fresh.
+ *
+ * Far from every trigger it asks for low-power (Wi-Fi/cell) fixes. Those are
+ * often too coarse for the accuracy gate, so for a rejected fix it works out a
+ * worst-case distance (distance minus the fix's uncertainty). That estimate is
+ * used only to schedule the next check and pick the accuracy, never to fire:
+ * firing still needs precise fixes that pass the gate.
  */
 class MonitoringEngine(
     private val evaluator: ProximityEvaluator = ProximityEvaluator(),
@@ -39,6 +47,9 @@ class MonitoringEngine(
 
     private val tracked = mutableMapOf<TriggerId, Tracked>()
 
+    /** Accuracy currently requested; [PollingPolicy.accuracyFor] keeps it between its thresholds. */
+    private var accuracy = LocationAccuracy.PRECISE
+
     /** Latest snapshot per trigger, so UI can be rebuilt between fixes. */
     var lastTick: Tick? = null
         private set
@@ -52,6 +63,8 @@ class MonitoringEngine(
         val toFire = mutableListOf<FireRequest>()
         val alreadySatisfied = mutableListOf<TriggerDetails>()
         var inaccurate = false
+        /** Worst-case distance to firing per trigger, including coarse fixes; drives scheduling. */
+        val planningRemaining = mutableListOf<Distance>()
 
         for (details in armed) {
             val target = ProximityTarget(details.place.coordinates, details.trigger.radius, details.trigger.direction)
@@ -62,12 +75,27 @@ class MonitoringEngine(
 
             val evaluation = evaluator.evaluate(target, entry.state, fix)
             entry.state = evaluation.state
-            val remaining = evaluation.remaining
+            var distance = evaluation.distance
+            var remaining = evaluation.remaining
+            val outcome = evaluation.outcome
+            if (outcome is Outcome.RejectedInaccurate) {
+                val roughDistance = Geodesy.distance(fix.coordinates, target.center)
+                val roughRemaining = evaluator.remainingUntilFire(target, roughDistance)
+                val worstCase = Distance(maxOf(0.0, roughRemaining.meters - outcome.accuracyMeters))
+                planningRemaining += worstCase
+                // Far away, a coarse estimate is good enough to show; near the line, keep "waiting for GPS".
+                if (worstCase >= pollingPolicy.preciseWithin) {
+                    distance = roughDistance
+                    remaining = worstCase
+                }
+            } else if (remaining != null) {
+                planningRemaining += remaining
+            }
             if (remaining != null) {
                 entry.startRemaining = maxOf(entry.startRemaining ?: remaining, remaining)
             }
 
-            when (evaluation.outcome) {
+            when (outcome) {
                 Outcome.Fire -> {
                     entry.fired = true
                     toFire += FireRequest(details, evaluation.distance)
@@ -79,19 +107,20 @@ class MonitoringEngine(
             if (!entry.fired) {
                 statuses += TriggerProgress(
                     details = details,
-                    distance = evaluation.distance,
+                    distance = distance,
                     remaining = remaining,
                     progress = progress(entry.startRemaining, remaining),
                 )
             }
         }
 
-        val nearestRemaining = statuses.mapNotNull { it.remaining }.minOrNull()
+        val nearestRemaining = planningRemaining.minOrNull()
         val nextInterval = if (nearestRemaining == null) {
             pollingPolicy.minInterval // No usable fix yet: look again soon.
         } else {
             pollingPolicy.nextInterval(nearestRemaining, fix.speedMetersPerSecond)
         }
+        accuracy = pollingPolicy.accuracyFor(nearestRemaining, accuracy)
 
         return Tick(
             progress = statuses.sortedWith(compareBy(nullsLast()) { it.remaining }),
@@ -99,6 +128,7 @@ class MonitoringEngine(
             alreadySatisfied = alreadySatisfied,
             waitingForAccuracy = inaccurate && statuses.all { it.remaining == null },
             nextInterval = nextInterval,
+            nextAccuracy = accuracy,
         ).also { lastTick = it }
     }
 
@@ -106,6 +136,7 @@ class MonitoringEngine(
     fun reset() {
         tracked.clear()
         lastTick = null
+        accuracy = LocationAccuracy.PRECISE
     }
 
     private fun progress(start: Distance?, remaining: Distance?): Float? {
@@ -125,6 +156,8 @@ data class Tick(
     /** True when every fix so far was too inaccurate to use. */
     val waitingForAccuracy: Boolean,
     val nextInterval: Duration,
+    /** Accuracy for the next location request. */
+    val nextAccuracy: LocationAccuracy = LocationAccuracy.PRECISE,
 )
 
 data class TriggerProgress(

@@ -1,5 +1,6 @@
 package com.stevenpg.roundthecorner2.core.location
 
+import com.stevenpg.roundthecorner2.core.domain.polling.LocationAccuracy
 import com.stevenpg.roundthecorner2.core.domain.proximity.LocationFix
 import kotlinx.coroutines.flow.Flow
 import kotlin.time.Duration
@@ -10,9 +11,9 @@ import kotlin.time.Duration
  */
 interface LocationClient {
     /**
-     * Continuous high-accuracy fixes, roughly every [interval]. Collect with
-     * `flatMapLatest` over a changing interval to adapt the rate; cancelling
-     * collection stops the GPS.
+     * Continuous fixes, roughly every [interval], at the given [accuracy]
+     * ([LocationAccuracy.LOW_POWER] avoids GPS). Collect with `flatMapLatest`
+     * over a changing request to adapt; cancelling collection stops updates.
      */
-    fun updates(interval: Duration): Flow<LocationFix>
+    fun updates(interval: Duration, accuracy: LocationAccuracy = LocationAccuracy.PRECISE): Flow<LocationFix>
 }

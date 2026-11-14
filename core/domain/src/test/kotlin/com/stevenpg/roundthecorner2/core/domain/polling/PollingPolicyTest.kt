@@ -37,4 +37,27 @@ class PollingPolicyTest {
     fun `a slow observed speed never lengthens it beyond the pessimistic default`() {
         assertEquals(30.seconds, policy.nextInterval(2_100.meters, observedSpeedMetersPerSecond = 1.0))
     }
+
+    @Test
+    fun `far from the nearest trigger uses low-power location`() {
+        assertEquals(LocationAccuracy.LOW_POWER, policy.accuracyFor(4.kilometers, LocationAccuracy.PRECISE))
+        assertEquals(LocationAccuracy.LOW_POWER, policy.accuracyFor(50.kilometers, LocationAccuracy.PRECISE))
+    }
+
+    @Test
+    fun `closing in switches to precise location`() {
+        assertEquals(LocationAccuracy.PRECISE, policy.accuracyFor(2_999.meters, LocationAccuracy.LOW_POWER))
+        assertEquals(LocationAccuracy.PRECISE, policy.accuracyFor(0.meters, LocationAccuracy.LOW_POWER))
+    }
+
+    @Test
+    fun `between the thresholds the current accuracy is kept so it doesn't flap`() {
+        assertEquals(LocationAccuracy.PRECISE, policy.accuracyFor(3_500.meters, LocationAccuracy.PRECISE))
+        assertEquals(LocationAccuracy.LOW_POWER, policy.accuracyFor(3_500.meters, LocationAccuracy.LOW_POWER))
+    }
+
+    @Test
+    fun `no distance estimate yet means precise`() {
+        assertEquals(LocationAccuracy.PRECISE, policy.accuracyFor(null, LocationAccuracy.LOW_POWER))
+    }
 }

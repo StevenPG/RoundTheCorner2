@@ -11,6 +11,7 @@ import com.stevenpg.roundthecorner2.core.data.preferences.UnitSystemProvider
 import com.stevenpg.roundthecorner2.core.data.preferences.UserPreferencesRepository
 import com.stevenpg.roundthecorner2.core.data.repository.TriggerRepository
 import com.stevenpg.roundthecorner2.core.domain.monitoring.MonitoringEngine
+import com.stevenpg.roundthecorner2.core.domain.polling.LocationAccuracy
 import com.stevenpg.roundthecorner2.core.domain.polling.PollingPolicy
 import com.stevenpg.roundthecorner2.core.domain.proximity.LocationFix
 import com.stevenpg.roundthecorner2.core.location.LocationClient
@@ -43,6 +44,7 @@ import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -74,7 +76,8 @@ class MonitoringService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val engine = MonitoringEngine()
     private val armed = MutableStateFlow<List<TriggerDetails>?>(null)
-    private val interval = MutableStateFlow(MIN_INTERVAL)
+    /** What to ask the OS for next. A StateFlow drops equal values, so it only re-registers on a real change. */
+    private val request = MutableStateFlow(LocationRequestSpec(MIN_INTERVAL, LocationAccuracy.PRECISE))
     private var units: StateFlow<ResolvedUnitSystem>? = null
     private var monitoringJob: Job? = null
 
@@ -151,9 +154,9 @@ class MonitoringService : Service() {
                     engine.pollingPolicy = PollingPolicy(maxInterval = cap.seconds.seconds)
                 }
             }
-            // 3. Location at an adaptive rate; re-subscribes only when the bucket changes.
-            interval
-                .flatMapLatest { locationClient.updates(it) }
+            // 3. Location at an adaptive rate and accuracy; re-subscribes only when either changes.
+            request
+                .flatMapLatest { locationClient.updates(it.interval, it.accuracy) }
                 .retryWhen { cause, attempt ->
                     // Transient provider errors: back off and try again. Permission loss: give up.
                     (cause !is SecurityException && attempt < MAX_LOCATION_RETRIES).also { if (it) delay(30.seconds) }
@@ -178,7 +181,7 @@ class MonitoringService : Service() {
         postStatus()
         tick.toFire.forEach { request -> scope.launch { firer.fire(request.details, request.distance) } }
         tick.alreadySatisfied.forEach(eventNotifier::alreadyHere)
-        interval.value = IntervalBuckets.quantize(tick.nextInterval)
+        request.value = LocationRequestSpec(IntervalBuckets.quantize(tick.nextInterval), tick.nextAccuracy)
     }
 
     /** Armed set changed between fixes (e.g. paused from the app): drop stale rows from the notification. */
@@ -212,6 +215,8 @@ class MonitoringService : Service() {
         status.update { MonitoringSnapshot() }
         super.onDestroy()
     }
+
+    private data class LocationRequestSpec(val interval: Duration, val accuracy: LocationAccuracy)
 
     private companion object {
         val MIN_INTERVAL = 10.seconds

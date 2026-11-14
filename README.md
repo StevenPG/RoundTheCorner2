@@ -93,6 +93,22 @@ To check the current UI against the baselines (CI runs this), run:
 ./gradlew testDebugUnitTest :app:testPlayDebugUnitTest -Proborazzi.test.verify=true
 ```
 
+## Releasing
+
+Pushing a version tag publishes signed `full` APKs (one per CPU type, plus SHA-256 sums)
+to a GitHub Release, through `.github/workflows/release.yml`:
+
+```bash
+git tag v0.2.0 && git push origin v0.2.0
+```
+
+The tag sets the version: `versionName` 0.2.0 and `versionCode` 200 (major×10000 +
+minor×100 + patch). Releases are signed with a fixed key from repository secrets, because
+Android only installs an update signed with the same key as the installed app. Create the
+key and secrets once with `tools/setup_release_signing.sh`, and keep the backup it writes
+to `~/.android/roundthecorner-release/` safe. Without the secrets the workflow fails rather
+than publishing debug-signed APKs.
+
 ## How a trigger decides to send
 
 All of this lives in `core:domain` (`ProximityEvaluator`) and runs as plain JVM unit tests.
@@ -184,6 +200,14 @@ Location updates ─────┘     (pure Kotlin)    ├─▶ "already here
   10 s when close, up to the *Check location at least every* setting (30 s to 5 min) when
   far away. The interval is snapped to a few fixed steps, so the location request is only
   re-registered when the step actually changes.
+- **No GPS while far away.** While the nearest trigger is more than 4 km from firing, the
+  app asks for low-power fixes (Wi-Fi and cell, no GPS). Within 3 km it switches to precise
+  GPS fixes; the gap stops it flapping. A coarse fix that fails the accuracy gate still gives
+  a worst-case distance (distance minus its uncertainty) for scheduling, but only precise
+  fixes can fire a trigger.
+- **Nothing runs when nothing is armed.** The monitoring service is the only code that uses
+  location. It starts when a trigger is armed and stops itself, unregistering location
+  updates, once none are.
 - **Sending at most once.** `TriggerFirer` changes the trigger from ARMED to FIRED in a
   single atomic step before sending, records the attempt in the history, and posts
   "Sent to Alex". Transient failures go to a WorkManager job (`SendRetryWorker`) that
