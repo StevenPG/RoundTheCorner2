@@ -175,6 +175,8 @@ build-logic          convention plugins: rtc.android.{application,library,compos
     `<module>/src/test/screenshots/`, and those PNGs are committed baselines.
   - Name test functions so they don't shadow stdlib calls (`emptyList()` once did), and
     give them an explicit `: Unit` return type.
+  - The README's Screenshots section links to six of these PNGs by path. If you rename
+    a capture, update the README too.
 - **`AppShellScreenshotTest`** is a Hilt integration test that runs the real `MainActivity`
   and the real dependency graph. It waits for "No triggers yet" before capturing.
 - **Commits.** End each commit message with the co-author and session lines used in

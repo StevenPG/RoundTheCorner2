@@ -4,6 +4,25 @@ This is the second iteration of RoundTheCorner, an Android app that runs a backg
 service and sends a message when you get within (or move beyond) a chosen distance of a
 place. The message can go out as an SMS, a Slack message or a Discord message.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="feature/triggers/src/test/screenshots/triggers_live_light.png" width="230" alt="Trigger list with one trigger being watched, 1.8 miles to go"><br><sub><b>Triggers</b>: watch, pause, live distance</sub></td>
+    <td align="center"><img src="feature/triggers/src/test/screenshots/trigger_editor_new_light.png" width="230" alt="New trigger editor with arrive/leave, place, distance presets and message"><br><sub><b>Trigger editor</b>: when, where, what to send</sub></td>
+    <td align="center"><img src="feature/places/src/test/screenshots/place_editor_coordinates_light.png" width="230" alt="Place editor with map pin, address search and typed coordinates"><br><sub><b>Places</b>: map pin, search or typed coordinates</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="feature/recipients/src/test/screenshots/recipients_list_light.png" width="230" alt="Recipients list with Slack, SMS and Discord recipients"><br><sub><b>Recipients</b>: SMS, Slack and Discord</sub></td>
+    <td align="center"><img src="feature/triggers/src/test/screenshots/trigger_editor_history_dark.png" width="230" alt="Editing a leave trigger in dark mode"><br><sub><b>Dark mode</b>: editing a "leave" trigger</sub></td>
+    <td align="center"><img src="feature/settings/src/test/screenshots/settings_automatic_dark.png" width="230" alt="Settings with distance units, check interval and theme"><br><sub><b>Settings</b>: units, check interval, theme</sub></td>
+  </tr>
+</table>
+
+<sub>These are the Roborazzi screenshot-test baselines, so they stay current when the
+screenshots are re-recorded. Maps show a placeholder because MapLibre can't render in
+JVM tests.</sub>
+
 ## Status
 
 | # | Milestone | State |

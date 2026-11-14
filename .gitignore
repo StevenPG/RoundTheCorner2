@@ -33,3 +33,6 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Release outputs copied out of build/ for uploading
+dist/
