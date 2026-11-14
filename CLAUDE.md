@@ -206,6 +206,11 @@ Release builds (one APK per ABI for sideloading, an AAB for Play):
 ./gradlew assembleFullRelease bundlePlayRelease
 ```
 
+Publishing: pushing a `vX.Y.Z` tag runs `.github/workflows/release.yml`, which builds signed
+`full` APKs and attaches them to a GitHub Release (see README "Releasing"). The version
+comes from the tag (`-Prtc.versionName`); signing comes from the `RTC_*` secrets created by
+`tools/setup_release_signing.sh`. Never fall back to debug signing for published APKs.
+
 ## Gotchas learned the hard way
 
 - **AGP 9 compiles Kotlin itself.** Don't apply `org.jetbrains.kotlin.android`.

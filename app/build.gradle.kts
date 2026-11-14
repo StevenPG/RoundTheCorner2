@@ -10,8 +10,28 @@ android {
 
     defaultConfig {
         applicationId = "com.stevenpg.roundthecorner2"
-        versionCode = 1
-        versionName = "0.1.0"
+        // The release workflow passes -Prtc.versionName=<tag without the v>; local builds use the default.
+        val releaseVersion = providers.gradleProperty("rtc.versionName").orNull
+        versionName = releaseVersion ?: "0.1.0"
+        versionCode = releaseVersion?.let(::versionCodeFor) ?: 1
+    }
+
+    /*
+     * Release signing. Android only installs an update signed with the same key
+     * as the installed app, so published APKs must always use one fixed key
+     * (like a code-signing certificate). CI provides it through environment
+     * variables from GitHub secrets (see tools/setup_release_signing.sh).
+     * Without them, release builds fall back to the debug key so they still
+     * install locally; the release workflow refuses to publish those.
+     */
+    val releaseKeystore = providers.environmentVariable("RTC_KEYSTORE_FILE").orNull
+    if (releaseKeystore != null) {
+        signingConfigs.create("release") {
+            storeFile = file(releaseKeystore)
+            storePassword = providers.environmentVariable("RTC_KEYSTORE_PASSWORD").get()
+            keyAlias = providers.environmentVariable("RTC_KEY_ALIAS").get()
+            keyPassword = providers.environmentVariable("RTC_KEY_PASSWORD").get()
+        }
     }
 
     buildFeatures {
@@ -52,9 +72,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // Signing config is supplied by CI / local keystore later; until then
-            // release builds are signed with the debug key so they can be installed.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 
@@ -108,4 +126,17 @@ dependencies {
     testImplementation(libs.hilt.android.testing)
     kspTest(libs.hilt.compiler)
     testImplementation(libs.turbine)
+}
+
+/**
+ * Turns "1.2.3" into 10203, so every release gets a larger versionCode than the
+ * one before (Android won't install an update with a lower one). Allows up to
+ * 99 minor and 99 patch versions.
+ */
+fun versionCodeFor(versionName: String): Int {
+    val match = Regex("""(\d+)\.(\d+)\.(\d+)""").matchEntire(versionName)
+        ?: error("Release version must look like 1.2.3, got '$versionName'")
+    val (major, minor, patch) = match.destructured.toList().map(String::toInt)
+    require(minor < 100 && patch < 100) { "minor and patch must be below 100: $versionName" }
+    return major * 10_000 + minor * 100 + patch
 }
